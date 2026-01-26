@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Dashboard | Student Terminal</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #e2e8f0; min-height: 100vh; }
+        
+        @keyframes rotateRGB { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .rgb-border { position: relative; padding: 2px; border-radius: 2rem; background: #0b1120; overflow: hidden; z-index: 1; }
+        .rgb-border::before { 
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; 
+            background: conic-gradient(#4f46e5, #06b6d4, #10b981, #f59e0b, #ef4444, #4f46e5); 
+            animation: rotateRGB 6s linear infinite; z-index: -2; 
+        }
+        .rgb-border::after { content: ''; position: absolute; inset: 2px; background: #0b1120; border-radius: 1.9rem; z-index: -1; }
+        
+        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s ease; }
+        .btn-cyber { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+        .btn-cyber:disabled { background: #1e293b !important; cursor: not-allowed; opacity: 0.5; }
+        
+        .new-badge { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+
+    <div class="container mx-auto max-w-4xl">
+        <div class="rgb-border mb-8">
+            <div class="p-6 flex justify-between items-center bg-[#0b1120]/95 rounded-[1.9rem]">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center border border-indigo-500/20">
+                        <i class="fas fa-user-shield text-xl text-indigo-400"></i>
+                    </div>
+                    <div>
+                        <h1 id="welcomeUser" class="text-lg font-black text-white uppercase italic tracking-tighter">STUDENT</h1>
+                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">
+                            DEADLINE: <span id="deadlineTimer" class="text-indigo-400 italic font-bold uppercase tracking-tight">FETCHING...</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end gap-2">
+                    <span id="portalStatusBadge" class="text-[8px] font-black px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 uppercase border border-emerald-500/20">Portal Open</span>
+                    <button onclick="logout()" class="text-[8px] font-black text-slate-600 hover:text-white uppercase tracking-widest transition-colors">Log Out</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-10">
+            <h2 class="text-[9px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-4 px-2 flex items-center gap-2">
+                <i class="fas fa-broadcast-tower animate-pulse"></i> Learning Data Update 
+            </h2>
+            <div id="materialList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="glass-card p-6 rounded-2xl border border-white/5 flex items-center justify-center">
+                    <p class="text-[8px] font-bold text-slate-600 uppercase italic">Waiting for broadcast...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            <div class="glass-card p-8 rounded-[2rem] text-center border border-white/5 hover:border-indigo-500/30">
+                <i class="fas fa-folder text-4xl text-yellow-500 mb-4"></i>
+                <h3 class="text-white font-black uppercase text-xs italic tracking-widest">Project Folder 1</h3>
+                <p class="text-[8px] text-slate-500 uppercase font-bold mb-6 italic">Submission Folder</p>
+                <button id="btn-p1" onclick="openUploadModal('Project 1')" class="btn-cyber w-full py-3 rounded-xl text-white font-black uppercase text-[9px] tracking-widest transition-all">
+                    <i class="fas fa-paperclip mr-2"></i> Attach File
+                </button>
+            </div>
+
+            <div class="glass-card p-8 rounded-[2rem] text-center border border-white/5 hover:border-indigo-500/30">
+                <i class="fas fa-folder text-4xl text-blue-500 mb-4"></i>
+                <h3 class="text-white font-black uppercase text-xs italic tracking-widest">Project Folder 2</h3>
+                <p class="text-[8px] text-slate-500 uppercase font-bold mb-6 italic">Submission Folder</p>
+                <button id="btn-p2" onclick="openUploadModal('Project 2')" class="btn-cyber w-full py-3 rounded-xl text-white font-black uppercase text-[9px] tracking-widest transition-all">
+                    <i class="fas fa-paperclip mr-2"></i> Attach File
+                </button>
+            </div>
+        </div>
+
+        <h2 class="text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-4 px-2">Transmission Logs</h2>
+        <div id="projectList" class="space-y-3 pb-10"></div>
+    </div>
+
+    <div id="uploadModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+        <div class="rgb-border w-full max-w-sm">
+            <div class="p-8 bg-[#0b1120] rounded-[1.9rem] relative text-center">
+                <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white"><i class="fas fa-times"></i></button>
+                <h2 id="modalTitle" class="text-lg font-black text-white uppercase italic mb-6">UPLOAD</h2>
+                <form id="fileUploadForm" class="space-y-4">
+                    <label class="block w-full p-8 border-2 border-dashed border-white/10 rounded-2xl cursor-pointer hover:bg-white/5 transition-all">
+                        <i class="fas fa-cloud-arrow-up text-2xl text-indigo-500 mb-2"></i>
+                        <p id="fileNameDisplay" class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Select Project File</p>
+                        <input type="file" id="projectFile" class="hidden" required>
+                    </label>
+                    <button type="submit" id="submitBtn" class="btn-cyber w-full py-4 rounded-xl text-white font-black uppercase text-[9px] tracking-widest shadow-lg shadow-indigo-600/20">
+                        Submit Transmission
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SB_URL = 'https://cwxpffwqpbedjffvpsbj.supabase.co'; 
+        const SB_KEY = 'sb_publishable_s2yXIg3L24wd0XYbrtnmPQ_HH_IN_e7';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        let portalOpen = true;
+
+        async function checkDeadline() {
+            try {
+                const { data } = await supabaseClient.from('portal_settings').select('*').eq('key', 'global_deadline').single();
+                if (data) {
+                    const deadline = new Date(data.value);
+                    const now = new Date();
+                    
+                    document.getElementById('deadlineTimer').innerText = deadline.toLocaleString('en-US', { 
+                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+                    });
+
+                    if (now > deadline) {
+                        portalOpen = false;
+                        const badge = document.getElementById('portalStatusBadge');
+                        badge.innerText = "Portal Closed";
+                        badge.className = "text-[8px] font-black px-3 py-1 rounded-full bg-red-500/10 text-red-500 uppercase border border-red-500/20";
+                        document.getElementById('btn-p1').disabled = true;
+                        document.getElementById('btn-p2').disabled = true;
+                        document.getElementById('btn-p1').innerText = "LOCKED";
+                        document.getElementById('btn-p2').innerText = "LOCKED";
+                    } else {
+                        portalOpen = true;
+                        const badge = document.getElementById('portalStatusBadge');
+                        badge.innerText = "Portal Open";
+                        badge.className = "text-[8px] font-black px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 uppercase border border-emerald-500/20";
+                        document.getElementById('btn-p1').disabled = false;
+                        document.getElementById('btn-p2').disabled = false;
+                        document.getElementById('btn-p1').innerHTML = '<i class="fas fa-paperclip mr-2"></i> Attach File';
+                        document.getElementById('btn-p2').innerHTML = '<i class="fas fa-paperclip mr-2"></i> Attach File';
+                    }
+                }
+            } catch (e) { console.log("Deadline Error:", e); }
+        }
+
+        async function loadMaterials() {
+            try {
+                const { data } = await supabaseClient.from('admin_materials').select('*').order('created_at', { ascending: false });
+                const matArea = document.getElementById('materialList');
+                if(data && data.length > 0) {
+                    matArea.innerHTML = data.map(m => `
+                        <div class="glass-card p-4 rounded-2xl flex justify-between items-center border border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 transition-all">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+                                    <i class="fas fa-file-powerpoint text-indigo-400 text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-black text-white uppercase italic tracking-widest">${m.title}</p>
+                                    <p class="text-[7px] font-bold text-slate-500 uppercase">System Resource</p>
+                                </div>
+                            </div>
+                            <a href="${m.file_link}" download target="_blank" class="text-[8px] font-black bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-white transition-all">DOWNLOAD</a>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) { console.error("Materials Load Error:", e); }
+        }
+
+        async function loadDashboard() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) { window.location.href = 'index.html'; return; }
+            
+            const displayName = user.user_metadata.full_name || user.email;
+            document.getElementById('welcomeUser').innerText = displayName.toUpperCase();
+
+            const { data: logs } = await supabaseClient.from('submissions').select('*').eq('student_name', displayName).order('created_at', { ascending: false });
+            
+            const listArea = document.getElementById('projectList');
+            if(logs && logs.length > 0) {
+                listArea.innerHTML = logs.map(s => `
+                    <div class="glass-card p-4 rounded-xl flex justify-between items-center border border-white/5">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-file-code ${s.project_type === 'Project 1' ? 'text-yellow-500' : 'text-blue-500'}"></i>
+                            <div>
+                                <p class="text-[10px] text-white font-black uppercase tracking-widest italic">${s.project_type}</p>
+                                <p class="text-[8px] font-bold uppercase ${s.status === 'Approved' ? 'text-emerald-500' : (s.status === 'Rejected' ? 'text-red-500' : 'text-amber-500')} italic">
+                                    ${s.status || 'Pending'} ${s.grade ? `| RESULT: ${s.grade}` : ''}
+                                </p>
+                                ${s.feedback ? `<p class="text-[7px] text-slate-400 mt-1 italic font-bold uppercase tracking-tight">System Message: ${s.feedback}</p>` : ''}
+                            </div>
+                        </div>
+                        <a href="${s.submission_link}" target="_blank" class="text-[8px] font-black text-indigo-400 hover:text-white border border-indigo-400/20 px-3 py-1 rounded-md transition-all">Review</a>
+                    </div>
+                `).join('');
+            } else {
+                listArea.innerHTML = `<p class="text-[8px] font-bold text-slate-600 uppercase italic text-center py-10">No transmissions recorded.</p>`;
+            }
+            
+            checkDeadline();
+            loadMaterials();
+        }
+
+        let activeProject = '';
+        function openUploadModal(p) { if(!portalOpen) return; activeProject = p; document.getElementById('modalTitle').innerText = "SUBMIT " + p; document.getElementById('uploadModal').classList.replace('hidden', 'flex'); }
+        function closeModal() { document.getElementById('uploadModal').classList.replace('flex', 'hidden'); }
+
+        document.getElementById('projectFile').onchange = function() { 
+            document.getElementById('fileNameDisplay').innerText = this.files[0] ? this.files[0].name.toUpperCase() : "Select Project File"; 
+        };
+
+        document.getElementById('fileUploadForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const file = document.getElementById('projectFile').files[0];
+            const btn = document.getElementById('submitBtn');
+            if(!file) return;
+
+            btn.disabled = true; btn.innerText = "UPLOADING...";
+
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const name = user.user_metadata.full_name || user.email;
+            
+            try {
+                const path = `uploads/${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+                const { error: uploadError } = await supabaseClient.storage.from('projects').upload(path, file);
+                if (uploadError) throw uploadError;
+
+                const { data: { publicUrl } } = supabaseClient.storage.from('projects').getPublicUrl(path);
+
+                const { error: insertError } = await supabaseClient.from('submissions').insert([{ 
+                    student_name: name, 
+                    project_type: activeProject, 
+                    submission_link: publicUrl, 
+                    status: 'Pending' 
+                }]);
+                if (insertError) throw insertError;
+
+                Swal.fire({ icon: 'success', title: 'TRANSMISSION SENT', background: '#0b1120', color: '#fff' });
+                closeModal(); 
+                document.getElementById('projectFile').value = '';
+                document.getElementById('fileNameDisplay').innerText = "Select Project File";
+                loadDashboard();
+            } catch (err) { 
+                Swal.fire({ title: 'Upload Failed', text: err.message, icon: 'error', background: '#0b1120', color: '#fff' });
+            } finally { 
+                btn.disabled = false; btn.innerText = "Submit Transmission"; 
+            }
+        };
+
+        function logout() { supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
+        
+        loadDashboard();
+        setInterval(() => {
+            checkDeadline();
+            loadMaterials();
+        }, 10000); // Check for updates and deadline every 10 seconds
+    </script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Login | DNHS PORTAL</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: #020617; 
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        @keyframes rotateRGB { 
+            from { transform: rotate(0deg) translateZ(0); } 
+            to { transform: rotate(360deg) translateZ(0); } 
+        }
+        @keyframes floating { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+
+        .rgb-container { 
+            position: relative; 
+            padding: 4px; 
+            border-radius: 3rem; 
+            background: #0b1120; 
+            overflow: hidden; 
+            z-index: 1; 
+            width: 95%; 
+            max-width: 650px;
+            will-change: transform;
+        }
+        
+        .rgb-container::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(#4f46e5, #06b6d4, #10b981, #f59e0b, #ef4444, #ec4899, #4f46e5);
+            animation: rotateRGB 7s linear infinite; 
+            z-index: -2;
+            will-change: transform;
+        }
+        .rgb-container::after { 
+            content: ''; position: absolute; inset: 4px; 
+            background: #0b1120; border-radius: 2.8rem; z-index: -1; 
+        }
+
+        .logo-rgb-frame {
+            position: relative; width: 120px; height: 120px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; overflow: hidden; z-index: 1;
+        }
+        @media (min-width: 768px) {
+            .logo-rgb-frame { width: 150px; height: 150px; }
+            .rgb-container { border-radius: 4rem; }
+            .rgb-container::after { border-radius: 3.8rem; }
+        }
+        
+        .logo-rgb-frame::before {
+            content: ''; position: absolute; width: 180%; height: 180%;
+            background: conic-gradient(#ec4899, #4f46e5, #06b6d4, #10b981, #f59e0b, #ec4899);
+            animation: rotateRGB 4s linear infinite; 
+            z-index: -1;
+            will-change: transform;
+        }
+        .logo-inner {
+            position: relative; width: 92%; height: 92%; background: #0b1120; 
+            border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        .logo-inner img { width: 100%; height: 100%; object-fit: cover; }
+        .logo-float { animation: floating 4s ease-in-out infinite; }
+
+        .btn-cyber { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); transition: all 0.4s; }
+        .btn-cyber:hover { box-shadow: 0 0 40px rgba(79, 70, 229, 0.6); transform: translateY(-2px); }
+        
+        .input-glow:focus { 
+            border-color: #6366f1; 
+            background: rgba(99, 102, 241, 0.05); 
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.15); 
+        }
+        
+        .glass-inner { background: rgba(11, 17, 32, 0.92); backdrop-filter: blur(15px); border-radius: 2.8rem; }
+        @media (min-width: 768px) { .glass-inner { border-radius: 3.8rem; } }
+    </style>
+</head>
+<body class="p-4 md:p-10 antialiased text-slate-200">
+
+    <audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="hoverSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+
+    <div class="rgb-container shadow-[0_0_60px_rgba(0,0,0,0.7)]">
+        <div class="glass-inner p-10 md:p-16 text-center"> 
+            <div class="flex flex-col items-center mb-10 md:mb-12">
+                <div class="logo-float">
+                    <div class="logo-rgb-frame shadow-[0_0_35px_rgba(79,70,229,0.5)]">
+                        <div class="logo-inner">
+                            <img src="LOGO.png" alt="Logo" onerror="this.src='https://ui-avatars.com/api/?name=CSS&background=0b1120&color=fff&size=256'">
+                        </div>
+                    </div>
+                </div>
+                <h2 class="mt-8 text-3xl md:text-5xl font-black text-white uppercase tracking-tighter italic">DNHS <span class="text-indigo-500">PORTAL</span></h2>
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.5em] mt-2">OFFICIAL CSS WEBSITE</p>
+            </div>
+
+            <form id="loginForm" class="space-y-6 md:space-y-7 text-left">
+                <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-3">Authorized Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" onmouseenter="playHover()"
+                           class="input-glow w-full bg-white/[0.03] border border-white/10 p-5 rounded-2xl text-white outline-none font-bold text-base transition-all" required autocomplete="email">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-3">Access Password</label>
+                    <div class="relative group">
+                        <input type="password" id="password" placeholder="••••••••" onmouseenter="playHover()"
+                               class="input-glow w-full bg-white/[0.03] border border-white/10 p-5 rounded-2xl text-white outline-none font-bold transition-all text-base" required autocomplete="current-password">
+                        <button type="button" onclick="togglePassword()" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-600 hover:text-white transition-colors">
+                            <i id="toggleIcon" class="fas fa-eye text-base"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" onmouseenter="playHover()"
+                        class="btn-cyber w-full text-white font-black py-6 rounded-[2.5rem] uppercase tracking-widest text-xs mt-6 shadow-2xl">
+                    LOG IN
+                </button>
+            </form>
+
+            <div class="mt-8 flex flex-col items-center">
+                <div id="g_id_onload"
+                     data-client_id="771628772905-70l29m9qb018vlea1829ajqga9lc4qfu.apps.googleusercontent.com"
+                     data-context="signin"
+                     data-ux_mode="popup"
+                     data-callback="handleCredentialResponse"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-shape="pill"
+                     data-theme="outline"
+                     data-text="signin_with"
+                     data-size="large"
+                     data-logo_alignment="left">
+                </div>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-white/5 flex justify-between items-center text-[11px] font-black uppercase tracking-widest text-slate-500">
+                <a href="register.html" onmouseenter="playHover()" class="hover:text-indigo-400 transition-all">Create Account</a>
+                <a href="forgot-pass.html" onmouseenter="playHover()" class="hover:text-indigo-400 transition-all">Forgot Password</a>
+            </div>
+
+            <div class="mt-12 pt-10 border-t border-white/5 text-center">
+                <p class="text-[10px] font-black text-slate-600 uppercase tracking-[0.5em] mb-6">Stay Connected</p>
+                <a href="https://www.facebook.com/rixx.carti" target="_blank" onmouseenter="playHover()" class="inline-flex items-center gap-4 px-10 py-4 rounded-full bg-indigo-600/5 border border-indigo-600/20 text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all duration-500 shadow-2xl group">
+                    <i class="fab fa-facebook-f text-sm group-hover:scale-125 transition-transform"></i>
+                    <span class="text-[11px] font-black uppercase tracking-[0.2em]">FOLLOW/MESSAGE THE DEVELOPER ON FACEBOOK</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://cwxpffwqpbedjffvpsbj.supabase.co'; 
+        const SUPABASE_KEY = 'sb_publishable_s2yXIg3L24wd0XYbrtnmPQ_HH_IN_e7';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const ADMIN_EMAIL = 'maricris.arenas1017@gmail.com';
+
+        window.onload = () => {
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                if (event === "PASSWORD_RECOVERY") {
+                    window.location.href = 'update-password.html'; 
+                }
+            });
+        };
+
+        const clickSound = document.getElementById('clickSound');
+        const hoverSound = document.getElementById('hoverSound');
+        function playClick() { clickSound.currentTime = 0; clickSound.play().catch(()=>{}); }
+        function playHover() { hoverSound.currentTime = 0; hoverSound.volume = 0.1; hoverSound.play().catch(()=>{}); }
+
+        function togglePassword() {
+            playClick();
+            const passField = document.getElementById('password');
+            const icon = document.getElementById('toggleIcon');
+            if (passField.type === 'password') {
+                passField.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passField.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // Logic para sa Google Login Response
+        async function handleCredentialResponse(response) {
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithIdToken({
+                    provider: 'google',
+                    token: response.credential,
+                });
+                if (error) throw error;
+                window.location.href = 'student-dashboard.html';
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'GOOGLE AUTH FAILED', text: err.message, background: '#0b1120', color: '#fff' });
+            }
+        }
+
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            playClick();
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+
+            Swal.fire({
+                title: 'SYNCING TERMINAL',
+                html: '<p class="text-[10px] font-black text-indigo-400 uppercase tracking-widest animate-pulse">Validating Signature...</p>',
+                showConfirmButton: false, background: '#0b1120', color: '#fff',
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                const is_admin = email === ADMIN_EMAIL.toLowerCase();
+                
+                Swal.fire({
+                    icon: 'success', title: is_admin ? 'ADMIN GRANTED' : 'STUDENT GRANTED',
+                    text: 'Initializing Dashboard...', background: '#0b1120', color: '#fff', showConfirmButton: false, timer: 1500
+                });
+
+                setTimeout(() => { window.location.href = is_admin ? 'admin.html' : 'student-dashboard.html'; }, 1500);
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'ACCESS DENIED', text: err.message, background: '#0b1120', color: '#fff' });
+            }
+        };
+    </script>
+</body>
+</html>
