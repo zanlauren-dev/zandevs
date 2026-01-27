@@ -78,16 +78,13 @@
 
   /* Updated CSS for hover effect on Google Sign-In button */
   .scale-hover {
-    transition: transform 1s ease, box-shadow 1s ease;
+    transition: transform 0.6s ease, box-shadow 0.6s ease;
   }
   .scale-hover:hover {
     transform: scale(1.5);
-    
-    /* Glow effect*/
-box-shadow: 5 10 15px rgba(79, 70, 229, 0.8);
   }
 
-  /* Tinanggal na pulse glow CSS */
+  /* pulse glow remove CSS */
 
   .btn-cyber { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); transition: all 0.4s; }
   .btn-cyber:hover { box-shadow: 0 0 40px rgba(79, 70, 229, 0.6); transform: translateY(-2px); }
@@ -207,15 +204,35 @@ box-shadow: 5 10 15px rgba(79, 70, 229, 0.8);
     }
   }
 
+  // Helper function to parse JWT token
+  function parseJwt(token) {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  }
+
   // Google Sign-In response handler
   async function handleCredentialResponse(response) {
     try {
+      const userInfo = parseJwt(response.credential);
+      const email = userInfo.email.toLowerCase();
+
       const { data, error } = await supabaseClient.auth.signInWithIdToken({
         provider: 'google',
         token: response.credential,
       });
       if (error) throw error;
-      window.location.href = 'student-dashboard.html';
+
+      const isAdmin = email === ADMIN_EMAIL.toLowerCase();
+
+      if (isAdmin) {
+        window.location.href = 'admin.html';
+      } else {
+        window.location.href = 'student-dashboard.html';
+      }
     } catch (err) {
       Swal.fire({ icon: 'error', title: 'GOOGLE AUTH FAILED', text: err.message, background: '#0b1120', color: '#fff' });
     }
