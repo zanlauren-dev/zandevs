@@ -1,280 +1,266 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Master Terminal | Admin Command</title>
-<!-- Tailwind CSS CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-<!-- Font Awesome CDN -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap" rel="stylesheet"/>
-<style>
-  body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    min-height: 100vh;
-    color: #cbd5e1;
-  }
-  /* Glassmorphism effect for cards and sections */
-  .glass {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border-radius: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
-  }
-  .glass:hover {
-    border-color: rgba(255, 255, 255, 0.4);
-  }
-  /* Animated border for header or sections */
-  @keyframes gradientBorder {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  .animated-border {
-    background: linear-gradient(270deg, #4f46e5, #7c3aed, #ef4444, #f59e0b, #10b981, #4f46e5);
-    background-size: 600% 600%;
-    animation: gradientBorder 15s linear infinite;
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Master Terminal | Admin Command</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #020617; color: #cbd5e1; min-height: 100vh; }
+        
+        .rgb-frame { position: relative; padding: 2px; border-radius: 2.5rem; overflow: hidden; z-index: 1; }
+        .rgb-frame::before { 
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; 
+            background: conic-gradient(from 0deg, #4f46e5, #ef4444, #f59e0b, #10b981, #4f46e5); 
+            animation: rotateRGB 8s linear infinite; z-index: -2; 
+        }
+        @keyframes rotateRGB { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .rgb-frame::after { content: ''; position: absolute; inset: 2px; background: #0b1120; border-radius: 2.4rem; z-index: -1; }
+        
+        .glass-card { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .active-tab { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important; border: none !important; }
+        
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
+    </style>
 </head>
 <body class="p-4 md:p-8">
 
-<div class="container mx-auto max-w-7xl space-y-8">
+    <div class="container mx-auto max-w-6xl">
+        <div class="rgb-frame mb-8">
+            <header class="p-6 flex flex-col lg:flex-row justify-between items-center bg-[#0b1120]/95 rounded-[2.4rem] gap-6">
+                <div class="flex items-center gap-5">
+                    <div class="w-14 h-14 bg-indigo-600/20 rounded-2xl flex items-center justify-center border border-indigo-500/30">
+                        <i class="fas fa-shield-halved text-2xl text-indigo-400"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-black text-white italic uppercase tracking-tighter">CSS<span class="text-indigo-500">Administration</span></h1>
+                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.4em]">Status: <span class="text-emerald-500 animate-pulse">Live Sync</span></p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap items-center justify-center gap-4 bg-white/5 p-4 rounded-3xl border border-white/5">
+                    <div class="text-center md:text-left">
+                        <p class="text-[8px] font-black text-indigo-400 uppercase tracking-widest">Portal Deadline</p>
+                        <p id="displayDeadline" class="text-xs font-bold text-white italic uppercase tracking-tight">Fetching...</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="datetime-local" id="deadlinePicker" class="bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-[10px] text-white outline-none focus:border-indigo-500">
+                        <button onclick="setGlobalDeadline()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase transition-all">UPDATE</button>
+                        <button onclick="resetDeadline()" class="bg-white/5 hover:bg-white/10 text-slate-400 px-3 py-2 rounded-xl text-[10px] font-black uppercase border border-white/5 transition-all">Reset</button>
+                    </div>
+                </div>
 
-  <!-- Header with animated gradient border -->
-  <div class="border-4 rounded-3xl p-2 animated-border">
-    <div class="glass p-6 flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
-      <h1 class="text-3xl font-extrabold uppercase tracking-widest text-white">Master Terminal</h1>
-      <div class="flex items-center space-x-4">
-        <button id="refreshBtn" class="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition">Refresh</button>
-        <button id="broadcastBtn" class="bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700 transition">New Broadcast</button>
-        <button id="settingsBtn" class="bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700 transition">Settings</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Stats and Operational Table -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <!-- Stats Card -->
-    <div class="glass p-4 shadow-xl hover:scale-105 transition-transform duration-300">
-      <h2 class="text-sm uppercase font-bold mb-2">Total Submissions</h2>
-      <p id="totalSubmissions" class="text-3xl font-extrabold">0</p>
-    </div>
-    <!-- Pending -->
-    <div class="glass p-4 shadow-xl hover:scale-105 transition-transform duration-300">
-      <h2 class="text-sm uppercase font-bold mb-2">Pending</h2>
-      <p id="pendingCount" class="text-3xl font-extrabold">0</p>
-    </div>
-    <!-- Completed -->
-    <div class="glass p-4 shadow-xl hover:scale-105 transition-transform duration-300">
-      <h2 class="text-sm uppercase font-bold mb-2">Completed</h2>
-      <p id="completedCount" class="text-3xl font-extrabold">0</p>
-    </div>
-  </div>
-
-  <!-- Operational Table -->
-  <div class="glass p-4 rounded-xl overflow-x-auto shadow-xl">
-    <h3 class="text-lg uppercase font-bold mb-4 text-white">Submissions</h3>
-    <table class="w-full text-left text-sm font-semibold uppercase text-slate-300 border-collapse border-spacing-y-2">
-      <thead>
-        <tr>
-          <th class="px-4 py-2 border-b border-white/20">Name</th>
-          <th class="px-4 py-2 border-b border-white/20">Email</th>
-          <th class="px-4 py-2 border-b border-white/20">Method</th>
-          <th class="px-4 py-2 border-b border-white/20">Status</th>
-          <th class="px-4 py-2 border-b border-white/20">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="submissionsTableBody" class="divide-y divide-white/10"></tbody>
-    </table>
-  </div>
-
-  <!-- New Section: Student Accounts with glassmorphism and animation -->
-  <div class="mt-8 space-y-4">
-    <h2 class="text-[10px] font-black uppercase tracking-widest italic text-white">Student Accounts</h2>
-    <div class="overflow-x-auto rounded-xl border border-white/20 bg-[#0b1120]/80 p-4 shadow-xl hover:scale-105 transition-transform duration-300">
-      <table class="w-full text-left text-[9px] font-black uppercase text-slate-500 tracking-widest border-collapse border-spacing-y-2">
-        <thead class="border-b border-white/10">
-          <tr>
-            <th class="px-4 py-2">Name</th>
-            <th class="px-4 py-2">Email</th>
-            <th class="px-4 py-2">Method</th>
-          </tr>
-        </thead>
-        <tbody id="usersTableBody" class="divide-y divide-white/10"></tbody>
-      </table>
-    </div>
-  </div>
-
-</div>
-
-<!-- SweetAlert2 modal scripts and other scripts -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-  const SB_URL = 'https://cwxpffwqpbedjffvpsbj.supabase.co'; 
-  const SB_KEY = 'sb_publishable_s2yXIg3L24wd0XYbrtnmPQ_HH_IN_e7';
-  const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-  let submissions = [];
-
-  // Fetch submissions
-  async function fetchData() {
-    const { data, error } = await supabaseClient.from('submissions').select('*').order('created_at', { ascending: false });
-    if (error) { console.error("Sync Error:", error); return; }
-    submissions = data || [];
-    updateStats();
-    renderTable();
-  }
-
-  function updateStats() {
-    document.getElementById('totalSubmissions').innerText = submissions.length;
-    const pending = submissions.filter(s => s.status === 'Pending').length;
-    const completed = submissions.filter(s => s.status === 'Completed').length;
-    document.getElementById('pendingCount').innerText = pending;
-    document.getElementById('completedCount').innerText = completed;
-  }
-
-  function renderTable() {
-    const tbody = document.getElementById('submissionsTableBody');
-    tbody.innerHTML = '';
-    if (submissions.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-4 text-center italic">No Submissions Found</td></tr>`;
-      return;
-    }
-    submissions.forEach(sub => {
-      tbody.innerHTML += `
-        <tr class="hover:bg-white/10 transition-all rounded-lg">
-          <td class="px-4 py-2">${sub.name}</td>
-          <td class="px-4 py-2">${sub.email}</td>
-          <td class="px-4 py-2">${sub.method}</td>
-          <td class="px-4 py-2">${sub.status}</td>
-          <td class="px-4 py-2 space-x-2">
-            <button class="bg-green-600 px-2 py-1 rounded hover:bg-green-700 text-xs" onclick="approveSubmission('${sub.id}')">Approve</button>
-            <button class="bg-red-600 px-2 py-1 rounded hover:bg-red-700 text-xs" onclick="rejectSubmission('${sub.id}')">Reject</button>
-            <button class="bg-gray-600 px-2 py-1 rounded hover:bg-gray-700 text-xs" onclick="deleteSubmission('${sub.id}')">Delete</button>
-          </td>
-        </tr>`;
-    });
-  }
-
-  // Placeholder functions for approve, reject, delete
-  async function approveSubmission(id) { 
-    await supabaseClient.from('submissions').update({status: 'Completed'}).eq('id', id);
-    fetchData();
-  }
-  async function rejectSubmission(id) { 
-    await supabaseClient.from('submissions').update({status: 'Rejected'}).eq('id', id);
-    fetchData();
-  }
-  async function deleteSubmission(id) { 
-    await supabaseClient.from('submissions').delete().eq('id', id);
-    fetchData();
-  }
-
-  // Fetch user accounts
-  async function fetchUserAccounts() {
-    const { data, error } = await supabaseClient.from('users').select('*');
-    if (error) { console.error('Error fetching users:', error); return; }
-    renderUserAccounts(data || []);
-  }
-
-  function renderUserAccounts(users) {
-    const tbody = document.getElementById('usersTableBody');
-    tbody.innerHTML = '';
-    if (users.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-4 text-center italic">No User Accounts Found</td></tr>`;
-      return;
-    }
-    users.forEach(user => {
-      tbody.innerHTML += `
-        <tr class="hover:bg-white/10 transition-all rounded-lg">
-          <td class="px-4 py-2">${user.name}</td>
-          <td class="px-4 py-2">${user.email}</td>
-          <td class="px-4 py-2">${user.method}</td>
-        </tr>`;
-    });
-  }
-
-  // Button Event Listeners
-  document.getElementById('refreshBtn').addEventListener('click', () => {
-    fetchData();
-  });
-
-  document.getElementById('broadcastBtn').addEventListener('click', () => {
-    // Show file upload dialog
-    Swal.fire({
-      title: 'Upload Files for Broadcast',
-      html: `
-        <input type="file" id="fileUpload" multiple class="w-full text-white" />
-        <p class="text-sm mt-2">Allowed types: ppt, pptx, docx, pdf, images, etc.</p>
-      `,
-      focusConfirm: false,
-      showCancelButton: true,
-      confirmButtonText: 'Upload',
-      preConfirm: () => {
-        const files = document.getElementById('fileUpload').files;
-        if (!files || files.length === 0) {
-          Swal.showValidationMessage('Please select files to upload');
-        }
-        return files;
-      }
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        const files = result.value;
-        // Loop through files and upload to database or storage
-        for (let file of files) {
-          // Example: upload to Supabase Storage
-          const { data, error } = await supabase.storage
-            .from('broadcasts')
-            .upload(`broadcasts/${file.name}`, file);
-          if (error) {
-            Swal.fire('Error', `Failed to upload ${file.name}`, 'error');
-            continue;
-          }
-        }
-        Swal.fire('Success', 'Files uploaded and broadcast scheduled!', 'success');
-      }
-    });
-  });
-
-  document.getElementById('settingsBtn').addEventListener('click', () => {
-    Swal.fire({
-      title: 'Settings',
-      html: `
-        <div class="flex flex-col space-y-2 text-white">
-          <label class="font-semibold">Notification Mode:</label>
-          <select class="bg-gray-800 p-2 rounded" id="notificationMode">
-            <option value="all">All Users</option>
-            <option value="students">Students Only</option>
-            <option value="admins">Admins Only</option>
-          </select>
-          <label class="font-semibold mt-2">Broadcast Interval (mins):</label>
-          <input type="number" min="1" max="60" id="broadcastInterval" class="bg-gray-800 p-2 rounded" value="10" />
+                <div class="flex gap-2">
+                    <button onclick="openMaterialModal()" class="bg-indigo-600/10 hover:bg-indigo-600 text-indigo-400 hover:text-white px-5 py-2 rounded-xl text-[9px] font-black uppercase border border-indigo-600/20 italic transition-all">Upload Topic</button>
+                    <button onclick="exportAndWipe()" class="bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white px-5 py-2 rounded-xl text-[9px] font-black uppercase border border-red-600/20 italic tracking-widest">Backup & Delete</button>
+                    <button onclick="logout()" class="bg-white/5 hover:bg-white/10 text-slate-400 px-5 py-2 rounded-xl text-[9px] font-black uppercase border border-white/5">Log out</button>
+                </div>
+            </header>
         </div>
-      `,
-      showCancelButton: true,
-      confirmButtonText: 'Save',
-      preConfirm: () => {
-        const mode = document.getElementById('notificationMode').value;
-        const interval = document.getElementById('broadcastInterval').value;
-        // Save settings to localStorage or backend
-        localStorage.setItem('notificationMode', mode);
-        localStorage.setItem('broadcastInterval', interval);
-        Swal.fire('Saved!', 'Your settings have been updated.', 'success');
-      }
-    });
-  });
 
-  // Initial fetch
-  fetchData();
-  fetchUserAccounts();
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div onclick="updateView('Pending')" id="tabPending" class="glass-card p-6 rounded-[2rem] cursor-pointer active-tab text-center border-white/5">
+                <p class="text-[9px] font-black text-white/60 uppercase mb-1">Pending</p>
+                <h3 id="pendingCount" class="text-4xl font-black text-white italic tracking-tighter">0</h3>
+            </div>
+            <div onclick="updateView('Approved')" id="tabApproved" class="glass-card p-6 rounded-[2rem] cursor-pointer text-center border-white/5">
+                <p class="text-[9px] font-black text-slate-500 uppercase mb-1">Validated</p>
+                <h3 id="approvedCount" class="text-4xl font-black text-white italic tracking-tighter">0</h3>
+            </div>
+            <div class="glass-card p-6 rounded-[2rem] text-center border-white/5"><p class="text-[9px] font-black text-slate-500 uppercase mb-1">FOLDER 1</p><h3 id="p1Count" class="text-4xl font-black text-yellow-500 italic">0</h3></div>
+            <div class="glass-card p-6 rounded-[2rem] text-center border-white/5"><p class="text-[9px] font-black text-slate-500 uppercase mb-1">FOLDER 2</p><h3 id="p2Count" class="text-4xl font-black text-blue-500 italic">0</h3></div>
+        </div>
 
-  // Refresh user accounts every minute
-  setInterval(fetchUserAccounts, 60000);
+        <div class="glass-card rounded-[2.5rem] overflow-hidden border-white/5 min-h-[400px]">
+            <div class="p-6 border-b border-white/5">
+                <h2 class="text-[10px] font-black text-white uppercase tracking-widest italic">Operational Stream: <span id="statusLabel" class="text-indigo-400">Queue</span></h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-white/[0.02] text-[9px] font-black uppercase text-slate-500 tracking-widest border-b border-white/5">
+                        <tr>
+                            <th class="px-8 py-5">Student / Project</th>
+                            <th class="px-8 py-5 text-center">Grade</th>
+                            <th class="px-8 py-5 text-center">Status</th>
+                            <th class="px-8 py-5 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-white/5"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-</script>
+    <div id="materialModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+        <div class="rgb-frame w-full max-w-sm">
+            <div class="p-8 bg-[#0b1120] rounded-[2.4rem] text-center relative">
+                <button onclick="closeMaterialModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white"><i class="fas fa-times"></i></button>
+                <h2 class="text-lg font-black text-white uppercase italic mb-6 tracking-tighter">Broadcast <span class="text-indigo-500">Topic</span></h2>
+                <input type="text" id="matTitle" placeholder="TITLE" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-[10px] text-white mb-4 outline-none focus:border-indigo-500 uppercase font-bold">
+                <input type="file" id="matFile" class="hidden">
+                <label for="matFile" class="block w-full p-8 border-2 border-dashed border-white/10 rounded-2xl cursor-pointer hover:bg-white/5 mb-6 transition-all group">
+                    <i class="fas fa-cloud-arrow-up text-2xl text-indigo-500 mb-3 group-hover:scale-110 transition-transform"></i>
+                    <p id="matFileName" class="text-[8px] font-black text-slate-500 uppercase tracking-widest">Select File (PPT, PDF, ZIP)</p>
+                </label>
+                <button onclick="uploadMaterial()" id="matBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 py-4 rounded-xl text-white font-black uppercase text-[10px] tracking-widest transition-all">Initialize Broadcast</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SB_URL = 'https://cwxpffwqpbedjffvpsbj.supabase.co'; 
+        const SB_KEY = 'sb_publishable_s2yXIg3L24wd0XYbrtnmPQ_HH_IN_e7';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        let submissions = [];
+        let currentFilter = 'Pending';
+
+        async function fetchData() {
+            const { data, error } = await supabaseClient.from('submissions').select('*').order('created_at', { ascending: false });
+            if (error) { console.error("Sync Error:", error); return; }
+            submissions = data || [];
+            updateStats();
+            renderTable();
+            loadDeadlineInfo();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            const filtered = submissions.filter(s => currentFilter === 'Pending' ? (s.status !== 'Approved') : (s.status === 'Approved'));
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-8 py-32 text-center text-[10px] font-black text-slate-700 uppercase tracking-widest italic">No Data Transmission Detected</td></tr>`;
+                return;
+            }
+            filtered.forEach(s => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-white/[0.03] transition-all group">
+                        <td class="px-8 py-6"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20"><i class="fas fa-file-code text-xs text-indigo-400"></i></div><div><p class="text-white font-black uppercase text-xs italic tracking-tight">${s.student_name}</p><p class="text-[8px] text-slate-500 font-bold uppercase mt-0.5 tracking-widest">${s.project_type}</p></div></div></td>
+                        <td class="px-8 py-6 text-center"><span class="text-xl font-black ${s.grade ? 'text-indigo-400' : 'text-slate-800'} italic">${s.grade || '--'}</span></td>
+                        <td class="px-8 py-6 text-center"><span class="px-3 py-1 rounded-full text-[8px] font-black uppercase border ${s.status === 'Approved' ? 'bg-emerald-500/5 text-emerald-500 border-emerald-500/20' : (s.status === 'Rejected' ? 'bg-red-500/5 text-red-500 border-red-500/20' : 'bg-amber-500/5 text-amber-500 border-amber-500/20')}">${s.status || 'Pending'}</span></td>
+                        <td class="px-8 py-6 text-right flex justify-end gap-2 items-center"><a href="${s.submission_link}" target="_blank" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-[8px] font-black uppercase transition-all">Open</a>
+                            ${s.status !== 'Approved' ? `<button onclick="handleApproval('${s.id}')" class="bg-emerald-600/10 text-emerald-500 px-4 py-2 rounded-lg text-[8px] font-black border border-emerald-500/20 italic hover:bg-emerald-600 hover:text-white transition-all">Approve</button><button onclick="handleRejection('${s.id}')" class="bg-red-600/10 text-red-500 px-4 py-2 rounded-lg text-[8px] font-black border border-red-500/20 italic hover:bg-red-600 hover:text-white transition-all">Reject</button>` : ''}
+                            <button onclick="deleteSingle('${s.id}')" class="text-slate-700 hover:text-red-500 transition-all ml-2"><i class="fas fa-trash-alt"></i></button></td></tr>`;
+            });
+        }
+
+        function openMaterialModal() { document.getElementById('materialModal').classList.replace('hidden', 'flex'); }
+        function closeMaterialModal() { document.getElementById('materialModal').classList.replace('flex', 'hidden'); }
+
+        document.getElementById('matFile').onchange = function() { 
+            document.getElementById('matFileName').innerText = this.files[0] ? this.files[0].name.toUpperCase() : "Select File (PPT, PDF, ZIP)"; 
+        };
+
+        async function uploadMaterial() {
+            const file = document.getElementById('matFile').files[0];
+            const title = document.getElementById('matTitle').value;
+            const btn = document.getElementById('matBtn');
+            if(!file || !title) return Swal.fire({ text: 'Fill all fields', icon: 'error', background: '#0b1120', color: '#fff' });
+            btn.innerText = "UPLOADING..."; btn.disabled = true;
+            try {
+                const filePath = `materials/${Date.now()}_${file.name}`;
+                await supabaseClient.storage.from('projects').upload(filePath, file);
+                const { data: { publicUrl } } = supabaseClient.storage.from('projects').getPublicUrl(filePath);
+                await supabaseClient.from('admin_materials').insert([{ title, file_link: publicUrl }]);
+                Swal.fire({ title: 'BROADCAST SUCCESS', icon: 'success', background: '#0b1120', color: '#fff' });
+                closeMaterialModal();
+            } catch (err) { Swal.fire({ title: 'ERROR', text: err.message, icon: 'error' }); }
+            finally { btn.innerText = "Initialize Broadcast"; btn.disabled = false; }
+        }
+
+        async function exportAndWipe() {
+            const approvedOnly = submissions.filter(s => s.status === 'Approved');
+            const { isConfirmed } = await Swal.fire({ 
+                title: 'TERMINATE ALL DATA?', 
+                text: `Backup includes ${approvedOnly.length} approved records. This will wipe ALL submissions AND broadcasted materials.`, 
+                icon: 'warning', 
+                showCancelButton: true, 
+                background: '#0b1120', 
+                color: '#fff', 
+                confirmButtonColor: '#ef4444',
+                confirmButtonText: 'CONFIRM PURGE'
+            });
+
+            if (isConfirmed) {
+                // 1. Export CSV
+                if (approvedOnly.length > 0) {
+                    let csv = "Student Name,Project,Grade,Status,Link\n";
+                    approvedOnly.forEach(s => csv += `"${s.student_name}","${s.project_type}",${s.grade},"${s.status}","${s.submission_link}"\n`);
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const a = document.createElement('a');
+                    a.href = window.URL.createObjectURL(blob);
+                    a.download = `Final_Backup_${new Date().getTime()}.csv`;
+                    a.click();
+                }
+
+                try {
+                    // 2. Wipe Students Submissions
+                    await supabaseClient.from('submissions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                    
+                    // 3. Wipe Admin Materials (PPTs)
+                    await supabaseClient.from('admin_materials').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+                    Swal.fire({ title: 'SYSTEM PURGED', text: 'All logs and materials have been cleared.', icon: 'success', background: '#0b1120', color: '#fff' });
+                    fetchData();
+                } catch (e) {
+                    Swal.fire({ title: 'PURGE FAILED', text: e.message, icon: 'error' });
+                }
+            }
+        }
+
+        async function handleApproval(id) {
+            const { value: grade } = await Swal.fire({ title: 'GRADE', input: 'number', background: '#0b1120', color: '#fff' });
+            if (grade) { await supabaseClient.from('submissions').update({ status: 'Approved', grade: parseInt(grade) }).eq('id', id); fetchData(); }
+        }
+
+        async function handleRejection(id) {
+            const { value: reason } = await Swal.fire({ title: 'REASON', input: 'textarea', background: '#0b1120', color: '#fff' });
+            if (reason) { await supabaseClient.from('submissions').update({ status: 'Rejected', feedback: reason, grade: 0 }).eq('id', id); fetchData(); }
+        }
+
+        async function deleteSingle(id) { if(confirm('Purge?')) { await supabaseClient.from('submissions').delete().eq('id', id); fetchData(); } }
+
+        function updateStats() {
+            document.getElementById('pendingCount').innerText = submissions.filter(s => s.status !== 'Approved').length;
+            document.getElementById('approvedCount').innerText = submissions.filter(s => s.status === 'Approved').length;
+            document.getElementById('p1Count').innerText = submissions.filter(s => s.project_type === 'Project 1').length;
+            document.getElementById('p2Count').innerText = submissions.filter(s => s.project_type === 'Project 2').length;
+        }
+
+        function updateView(v) { 
+            currentFilter = v; 
+            document.getElementById('statusLabel').innerText = v === 'Pending' ? 'Queue' : 'Validated';
+            document.getElementById('tabPending').classList.toggle('active-tab', v === 'Pending');
+            document.getElementById('tabApproved').classList.toggle('active-tab', v === 'Approved');
+            renderTable(); 
+        }
+
+        async function loadDeadlineInfo() {
+            const { data } = await supabaseClient.from('portal_settings').select('value').eq('key', 'global_deadline').single();
+            if (data) document.getElementById('displayDeadline').innerText = new Date(data.value).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        async function setGlobalDeadline() {
+            const val = document.getElementById('deadlinePicker').value;
+            if(!val) return;
+            await supabaseClient.from('portal_settings').upsert({ key: 'global_deadline', value: val });
+            loadDeadlineInfo();
+        }
+
+        async function resetDeadline() {
+            await supabaseClient.from('portal_settings').upsert({ key: 'global_deadline', value: '2026-12-31T23:59' });
+            loadDeadlineInfo();
+        }
+
+        function logout() { window.location.href = "index.html"; }
+        fetchData();
+        setInterval(fetchData, 60000);
+    </script>
 </body>
 </html>
