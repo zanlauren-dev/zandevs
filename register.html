@@ -1,53 +1,274 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-    <title>Register | DNHS</title>
-</head>
-<body class="bg-[#0b1120] flex items-center justify-center min-h-screen p-6 font-sans">
-
-    <div class="glass w-full max-w-md p-10 shadow-2xl animate-fade">
-        <h2 class="text-3xl font-black text-white mb-8 text-center uppercase tracking-tighter">Create Account</h2>
+    <title>Register | DNHS PORTAL</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
         
-        <form id="registerForm" class="space-y-4">
-            <div class="relative">
-                <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-                <input type="text" id="regName" placeholder="Full Name" 
-                       class="w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all" required>
-            </div>
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --dark: #0b1120;
+        }
 
-            <div class="relative">
-                <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-                <input type="email" id="regEmail" placeholder="School Email" 
-                       class="w-full bg-white/5 border border-white/10 p-4 pl-12 rounded-2xl text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all" required>
-            </div>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-            <div class="relative">
-                <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-                <input type="password" id="regPass" placeholder="Password" 
-                       class="w-full bg-white/5 border border-white/10 p-4 pl-12 pr-12 rounded-2xl text-white outline-none focus:ring-2 focus:ring-indigo-500 transition-all" required>
-                <button type="button" onclick="toggleRegPassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-400">
-                    <i id="regToggleIcon" class="fas fa-eye"></i>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background Image */
+        .bg-gradient-animate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: url('MAIN BG.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        /* Dark overlay for readability */
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: rgba(11, 17, 32, 0.85);
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .glass-card { 
+            position: relative; 
+            border-radius: 1.5rem;
+            background: rgba(11, 17, 32, 0.85);
+            backdrop-filter: blur(20px);
+            z-index: 1; 
+            width: 92%;
+            max-width: 460px;
+            animation: fadeInUp 0.8s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (min-width: 768px) {
+            .glass-card { border-radius: 2rem; max-width: 480px; }
+        }
+
+        .glass-inner {
+            padding: 1.5rem 1.25rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        @media (min-width: 1024px) {
+            .glass-inner { padding: 2rem 2.5rem; }
+        }
+
+        /* Button Styles */
+        .btn-cyber {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #06b6d4 100%);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-cyber::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-cyber:hover::before {
+            left: 100%;
+        }
+
+        .btn-cyber:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Input Styles */
+        .input-glow:focus {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
+            transform: scale(1.01);
+        }
+
+        .input-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Link Styles */
+        .link-hover {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .link-hover::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .link-hover:hover::after {
+            width: 100%;
+        }
+
+        /* Form Animation */
+        .form-animate {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        /* Fade animations */
+        .fade-in {
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="p-4 antialiased text-slate-200">
+    <!-- Background Image -->
+    <div class="bg-gradient-animate"></div>
+    <!-- Dark Overlay -->
+    <div class="bg-overlay"></div>
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+    <audio id="hoverSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+
+    <div class="glass-card fade-in">
+        <div class="glass-inner">
+            <h2 class="text-2xl md:text-3xl font-black text-white mb-6 md:mb-8 text-center uppercase tracking-tighter">
+                Create <span class="text-indigo-500">Account</span>
+            </h2>
+            
+            <form id="registerForm" class="space-y-4">
+                <div class="relative">
+                    <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                    <input type="text" id="regName" placeholder="Full Name" 
+                           class="input-glow w-full bg-white/[0.02] border border-white/10 p-4 pl-12 rounded-xl md:rounded-2xl text-white outline-none focus:font-bold transition-all text-sm" required>
+                </div>
+
+                <div class="relative">
+                    <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                    <input type="email" id="regEmail" placeholder="School Email" 
+                           class="input-glow w-full bg-white/[0.02] border border-white/10 p-4 pl-12 rounded-xl md:rounded-2xl text-white outline-none focus:font-bold transition-all text-sm" required>
+                </div>
+
+                <div class="relative">
+                    <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+                    <input type="password" id="regPass" placeholder="Password" 
+                           class="input-glow w-full bg-white/[0.02] border border-white/10 p-4 pl-12 pr-12 rounded-xl md:rounded-2xl text-white outline-none focus:font-bold transition-all text-sm" required>
+                    <button type="button" onclick="toggleRegPassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-400 transition-all">
+                        <i id="regToggleIcon" class="fas fa-eye"></i>
+                    </button>
+                </div>
+
+                <button type="submit" onmouseenter="playHover()"
+                        class="btn-cyber w-full text-white font-black py-4 md:py-5 rounded-2xl md:rounded-[2rem] uppercase tracking-widest text-[10px] mt-2">
+                    REGISTER NOW
                 </button>
+            </form>
+
+            <div class="mt-6 md:mt-8 text-center">
+                <a href="index.html" onmouseenter="playHover()" class="link-hover text-xs text-slate-600 font-black uppercase tracking-widest hover:text-indigo-400 transition-all">
+                    Back to Login
+                </a>
             </div>
-
-            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95">
-                REGISTER NOW
-            </button>
-        </form>
-
-        <div class="mt-6 text-center">
-            <a href="index.html" class="text-xs text-indigo-400 font-bold uppercase tracking-widest hover:underline">Back to Login</a>
         </div>
     </div>
 
     <script src="auth.js"></script>
     <script>
+        // Generate floating particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        const clickSound = document.getElementById('clickSound');
+        const hoverSound = document.getElementById('hoverSound');
+        
+        function playClick() { clickSound.currentTime = 0; clickSound.play().catch(()=>{}); }
+        function playHover() { hoverSound.currentTime = 0; hoverSound.volume = 0.1; hoverSound.play().catch(()=>{}); }
+
         // Toggle Password Logic
         function toggleRegPassword() {
             const passInput = document.getElementById('regPass');
@@ -64,6 +285,7 @@
         // Registration Logic
         document.getElementById('registerForm').onsubmit = async (e) => {
             e.preventDefault();
+            playClick();
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPass').value;
             const fullName = document.getElementById('regName').value;
@@ -79,7 +301,6 @@
                 password: password,
                 options: { 
                     data: { full_name: fullName },
-                    // Dinagdagan ko ito para bumalik sa login page pagkatapos i-click ang link sa email
                     emailRedirectTo: window.location.origin + '/index.html'
                 }
             });
