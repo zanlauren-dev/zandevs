@@ -1,9 +1,24 @@
 // auth.js - DNHS Portal Security Logic
 
 // 1. SUPABASE INITIALIZATION
-const SUPABASE_URL = 'https://cwxpffwqpbedjffvpsbj.supabase.co'; 
+const SUPABASE_URL = 'https://cwxpffwqpbedjffvpsbj.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_s2yXIg3L24wd0XYbrtnmPQ_HH_IN_e7';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Initialize Supabase and attach to window
+window.supabaseClient = null;
+
+function initSupabase() {
+    // Wait for Supabase to be available
+    if (typeof Supabase === 'undefined') {
+        // Retry after a short delay
+        setTimeout(initSupabase, 100);
+        return;
+    }
+    window.supabaseClient = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+}
+
+// Start initialization
+initSupabase();
 
 // 2. ADMIN CONFIGURATION
 const ADMIN_EMAIL = 'maricris.arenas1017@gmail.com'; 
@@ -15,7 +30,7 @@ async function handleLogin(email, password) {
     try {
         showLoading('SYNCING TERMINAL', 'Verifying Digital Signature...');
 
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
+        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
             email: email,
             password: password
         });
@@ -43,7 +58,7 @@ async function handleSignUp(email, password, fullName) {
     try {
         showLoading('ENROLLING STUDENT', 'Creating Secure Profile...');
 
-        const { data, error } = await supabaseClient.auth.signUp({
+        const { data, error } = await window.supabaseClient.auth.signUp({
             email: email,
             password: password,
             options: {
@@ -74,7 +89,7 @@ async function handleSignUp(email, password, fullName) {
  * Ilagay ito sa simula ng bawat page (Admin/Student)
  */
 async function checkSession(requiredRole) {
-    const { data: { user } } = await supabaseClient.auth.getUser();
+    const { data: { user } } = await window.supabaseClient.auth.getUser();
     
     if (!user) {
         window.location.href = 'index.html';
@@ -139,24 +154,4 @@ function showError(message) {
     });
 }
 
-/**
- * HANDLE GOOGLE SIGN IN
- */
-async function handleGoogleSignIn() {
-    try {
-        const { data, error } = await supabaseClient.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: window.location.origin + '/index.html',
-                queryParams: {
-                    access_type: 'offline',
-                    prompt: 'consent',
-                },
-            }
-        });
 
-        if (error) throw error;
-    } catch (err) {
-        showError(err.message);
-    }
-}
