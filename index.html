@@ -1,916 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="auth.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-<title>Login | DNHS PORTAL</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-  
-  :root {
-    --primary: #6366f1;
-    --secondary: #8b5cf6;
-    --accent: #06b6d4;
-    --dark: #0b1120;
-  }
-
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body { 
-    font-family: 'Plus Jakarta Sans', sans-serif; 
-    background: var(--dark);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow-x: hidden;
-    position: relative;
-  }
-
-  /* Background Image */
-  .bg-gradient-animate {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    background: url('MAIN BG.jpg') no-repeat center center fixed;
-    background-size: cover;
-  }
-
-  /* Dark overlay for readability */
-  .bg-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    background: rgba(11, 17, 32, 0.85);
-  }
-
-  @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  /* Floating Particles */
-  .particles {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    overflow: hidden;
-  }
-
-  .particle {
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: rgba(99, 102, 241, 0.3);
-    border-radius: 50%;
-    animation: float 15s infinite;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
-  }
-
-  /* RGB Border Animation */
-  @keyframes rotateRGB { 
-    from { transform: rotate(0deg) translateZ(0); } 
-    to { transform: rotate(360deg) translateZ(0); } 
-  }
-
-  @keyframes floating {
-    0%, 100% { transform: translateY(0px) scale(1); }
-    50% { transform: translateY(-15px) scale(1.02); }
-  }
-
-  @keyframes pulseGlow {
-    0%, 100% { box-shadow: 0 0 30px rgba(99, 102, 241, 0.4); }
-    50% { box-shadow: 0 0 60px rgba(99, 102, 241, 0.8); }
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
+  <title>Login | DNHS PORTAL</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    
+    :root {
+      --primary: #6366f1;
+      --secondary: #8b5cf6;
+      --accent: #06b6d4;
+      --dark: #0b1120;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
     }
-  }
 
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.9);
+    .bg-gradient-animate {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -1;
+      background: url('MAIN BG.jpg') no-repeat center center fixed;
+      background-size: cover;
     }
-    to {
-      opacity: 1;
-      transform: scale(1);
+
+    .bg-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: -1;
+      background: rgba(11, 17, 32, 0.85);
     }
-  }
 
-  .rgb-container { 
-    position: relative; 
-    border-radius: 1.5rem;
-    background: rgba(11, 17, 32, 0.85);
-    backdrop-filter: blur(20px);
-    z-index: 1; 
-    width: 92%;
-    max-width: 560px;
-    animation: fadeInUp 0.8s ease-out;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
-    min-height: 520px;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-  }
+    .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
+    .particle { position: absolute; width: 4px; height: 4px; background: rgba(99, 102, 241, 0.3); border-radius: 50%; animation: float 15s infinite; }
 
-  .logo-float { animation: none; }
+    @keyframes float {
+      0%, 100% { transform: translateY(100vh); opacity: 0; }
+      10%, 90% { opacity: 1; }
+      100% { transform: translateY(-10vh); }
+    }
 
-  .logo-rgb-frame {
-    position: relative;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    z-index: 1;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-  }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* gentle logo float */
-  .logo-float {
-    animation: floating 6s ease-in-out infinite;
-    transform-origin: center;
-  }
+    .rgb-container { 
+      position: relative; 
+      border-radius: 1.5rem;
+      background: rgba(11, 17, 32, 0.85);
+      backdrop-filter: blur(20px);
+      z-index: 1; 
+      width: 92%;
+      max-width: 500px;
+      animation: fadeInUp 0.8s ease-out;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+      padding: 2rem;
+    }
 
-  @media (min-width: 768px) {
-    .rgb-container { border-radius: 2rem; max-width: 560px; }
-    .glass-inner { padding: 2rem 2.5rem; }
-  }
+    .logo-rgb-frame {
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto;
+      animation: floating 6s ease-in-out infinite;
+    }
 
-  /* Make glass-inner slightly larger to give more vertical space */
-  .glass-inner {
-    padding: 1.5rem 1.25rem;
-    width: 100%;
-    box-sizing: border-box;
-  }
+    @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-  @media (min-width: 1024px) {
-    .rgb-container { min-height: 580px; }
-    .glass-inner { padding: 2.5rem 3rem; }
-  }
+    .input-glow:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    }
 
-  .logo-rgb-frame::before { display: none; }
+    .auth-btn {
+      width: 100%; padding: 0.75rem; border-radius: 0.75rem;
+      font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      transition: all 0.3s ease;
+    }
 
-  .logo-inner {
-    position: relative;
-    width: 92%;
-    height: 92%;
-    background: var(--dark);
-    border-radius: 50%;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
-  }
-
-  .logo-inner img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* Button Styles */
-  .btn-cyber {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #06b6d4 100%);
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
-  }
-
-  .btn-cyber::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-  }
-
-  .btn-cyber:hover::before {
-    left: 100%;
-  }
-
-  .btn-cyber:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
-  }
-
-  .btn-cyber:active {
-    transform: translateY(0);
-  }
-
-  /* Input Styles */
-  .input-glow:focus {
-    border-color: var(--primary);
-    background: rgba(99, 102, 241, 0.05);
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.15);
-    transform: scale(1.01);
-  }
-
-  .input-transition {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Link Styles */
-  .link-hover {
-    position: relative;
-    transition: all 0.3s ease;
-  }
-
-  .link-hover::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: var(--primary);
-    transition: width 0.3s ease;
-  }
-
-  .link-hover:hover::after {
-    width: 100%;
-  }
-
-  /* Social Button */
-  .social-btn {
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .social-btn:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
-  }
-
-  /* Developer Follow button - Super smooth animations */
-  .dev-follow-btn {
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 0.625rem;
-    min-width: 140px;
-    font-size: 0.875rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 10px 30px rgba(24, 119, 242, 0.18);
-    position: relative;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .dev-follow-btn .fab {
-    font-size: 1rem;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .dev-follow-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  .dev-follow-btn::after {
-    content: '';
-    position: absolute;
-    left: -60%;
-    top: 0;
-    width: 35%;
-    height: 100%;
-    background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.35), rgba(255,255,255,0));
-    transform: skewX(-25deg);
-    transition: left 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
-  }
-  .dev-follow-btn:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 14px 40px rgba(24, 119, 242, 0.3);
-  }
-  .dev-follow-btn:hover .fab {
-    transform: scale(1.1);
-  }
-  .dev-follow-btn:hover::before {
-    opacity: 1;
-  }
-  .dev-follow-btn:hover::after {
-    left: 160%;
-    transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .dev-follow-btn:active {
-    transform: translateY(0) scale(0.98);
-    transition: all 0.15s ease;
-  }
-  .dev-follow-btn:active .fab {
-    transform: scale(0.95);
-  }
-
-  /* subtle glow for emphasis */
-  @media (prefers-reduced-motion: reduce) { .dev-follow-btn { animation: none; } }
-
-  /* Form Animation */
-  .form-animate {
-    animation: fadeInUp 0.8s ease-out 0.2s both;
-  }
-
-  /* Google Button Animation */
-  .google-btn-animate {
-    animation: scaleIn 0.6s ease-out 0.4s both;
-  }
-
-  /* Footer Animation */
-  .footer-animate {
-    animation: fadeIn 0.8s ease-out 0.6s both;
-  }
-
-  /* Sky blue loader animation */
-  @keyframes skySpin {
-    0% { stroke-dashoffset: 95; opacity: 1; }
-    50% { stroke-dashoffset: 0; opacity: 1; }
-    100% { stroke-dashoffset: -95; opacity: 0.5; }
-  }
-
-  /* Link animations */
-  .link-animate {
-    position: relative;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .link-animate::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 50%;
-    width: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #6366f1, transparent);
-    transform: translateX(-50%);
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .link-animate:hover {
-    transform: translateY(-1px);
-    text-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-  }
-  .link-animate:hover::after {
-    width: 100%;
-  }
-
-  /* Form Elements */
-  .form-group {
-    animation: fadeInUp 0.6s ease-out both;
-  }
-
-  .form-group:nth-child(1) { animation-delay: 0.3s; }
-  .form-group:nth-child(2) { animation-delay: 0.4s; }
-  .form-group:nth-child(3) { animation-delay: 0.5s; }
-
-  /* Center and constrain the login form */
-  .glass-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  #loginForm {
-    width: 100%;
-    max-width: 420px;
-    margin: 0 auto;
-  }
-
-  /* Button micro-interaction */
-  #loginForm button[type="submit"] {
-    position: relative;
-    overflow: hidden;
-    will-change: transform;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  #loginForm button[type="submit"]::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  #loginForm button[type="submit"]::after {
-    content: '';
-    position: absolute;
-    left: -60%;
-    top: 0;
-    width: 40%;
-    height: 100%;
-    background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.3), rgba(255,255,255,0));
-    transform: skewX(-25deg);
-    transition: left 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
-  }
-  #loginForm button[type="submit"]:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
-  }
-  #loginForm button[type="submit"]:hover::before {
-    opacity: 1;
-  }
-  #loginForm button[type="submit"]:hover::after {
-    left: 160%;
-    transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  #loginForm button[type="submit"]:active {
-    transform: translateY(0) scale(0.98);
-    transition: all 0.15s ease;
-  }
-
-  /* Focus-visible for accessibility */
-  .input-glow:focus-visible {
-    outline: 3px solid rgba(99,102,241,0.14);
-    outline-offset: 3px;
-  }
-
-  /* Google button smooth animations */
-  .google-btn-animate button {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .google-btn-animate button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, transparent 50%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  .google-btn-animate button::after {
-    content: '';
-    position: absolute;
-    left: -60%;
-    top: 0;
-    width: 40%;
-    height: 100%;
-    background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.4), rgba(255,255,255,0));
-    transform: skewX(-25deg);
-    transition: left 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
-  }
-  .google-btn-animate button:hover {
-    transform: translateY(-2px) scale(1.01);
-    box-shadow: 0 12px 40px rgba(99, 102, 241, 0.25);
-  }
-  .google-btn-animate button:hover::before {
-    opacity: 1;
-  }
-  .google-btn-animate button:hover::after {
-    left: 160%;
-    transition: left 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .google-btn-animate button:active {
-    transform: translateY(0) scale(0.98);
-    transition: all 0.15s ease;
-  }
-  .google-btn-animate { display: flex; justify-content: center; }
-
-  /* Auth buttons (Sign In + Google) unified style */
-  .auth-btn {
-    width: 100%;
-    padding: 0.625rem 1.5rem; /* matches py-2.5 px-6 */
-    border-radius: 0.75rem;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    max-width: 420px;
-    margin: 0 auto;
-  }
-  .auth-btn:focus { outline: none; box-shadow: 0 8px 30px rgba(99,102,241,0.12); }
-
-  /* Respect reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-  }
-
-  /* Mobile tweaks */
-  @media (max-width: 420px) {
-    .glass-inner { padding: 1.25rem; }
-    .logo-rgb-frame { width: 84px; height: 84px; }
-    .text-3xl { font-size: 1.45rem; }
-  }
-</style>
+    @keyframes skySpin { 
+      0% { stroke-dashoffset: 95; } 
+      100% { stroke-dashoffset: -95; } 
+    }
+  </style>
 </head>
-<body class="p-4 md:p-6 lg:p-8 antialiased text-slate-200">
+<body class="antialiased text-slate-200">
 
-<!-- Audio Elements (hidden) -->
-<audio id="clickSound"></audio>
-<audio id="hoverSound"></audio>
-
-<!-- Background Image -->
 <div class="bg-gradient-animate"></div>
-
-<!-- Dark Overlay -->
 <div class="bg-overlay"></div>
-
-<!-- Floating Particles -->
 <div class="particles" id="particles"></div>
 
-<div class="rgb-container shadow-[0_20px_80px_rgba(0,0,0,0.5)]">
-  <div class="glass-inner p-8 md:p-12 text-center relative">
-    
-    <!-- Decorative Elements -->
-    <div class="absolute top-4 right-4 w-20 h-20 bg-gradient-to-br from-indigo-500/10 to-cyan-500/10 rounded-full blur-xl"></div>
-    <div class="absolute bottom-4 left-4 w-16 h-16 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-xl"></div>
-
-    <!-- Logo Section -->
-    <div class="flex flex-col items-center mb-8">
-      <div class="logo-rgb-frame logo-float">
-          <div class="logo-inner">
-            <img src="LOGO.png" alt="Logo" onerror="this.src='https://ui-avatars.com/api/?name=DNHS&background=0b1120&color=fff&size=256'" />
-          </div>
-        </div>
+<div class="rgb-container">
+  <div class="text-center">
+    <div class="logo-rgb-frame">
+      <div class="w-[90%] h-[90%] rounded-full overflow-hidden bg-slate-900">
+        <img src="LOGO.png" alt="Logo" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=DNHS&background=0b1120&color=fff'" />
       </div>
-      <h2 class="mt-6 text-3xl md:text-4xl font-extrabold text-white uppercase tracking-tight">
-        DNHS <span class="text-indigo-500 bg-gradient-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent">PORTAL</span>
-      </h2>
-      <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.4em] mt-3">Official Student Management System</p>
     </div>
 
-    <!-- Login Form -->
-    <form id="loginForm" class="space-y-4 form-animate">
-      <div class="form-group">
-        <label class="text-xs font-semibold text-slate-400 uppercase tracking-widest ml-2 block mb-2">Authorized Email</label>
-        <div class="relative">
-          <input type="email" id="email" placeholder="Enter your email"
-                 onmouseenter="playHover()"
-                 class="input-glow input-transition w-full bg-white/[0.03] border border-white/10 p-3 pl-11 rounded-lg text-white placeholder-slate-500 outline-none font-medium text-sm focus:bg-white/[0.06]"
-                 required autocomplete="email" />
-          <i class="fas fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+    <h2 class="mt-6 text-3xl font-extrabold text-white uppercase tracking-tight">
+      DNHS <span class="bg-gradient-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent">PORTAL</span>
+    </h2>
+    <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.4em] mt-2 mb-8">Official Student Management System</p>
+
+    <form id="loginForm" class="space-y-4 text-left">
+      <div>
+        <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Authorized Email</label>
+        <div class="relative mt-1">
+          <input type="email" id="email" placeholder="Email" required
+                 class="input-glow w-full bg-white/[0.03] border border-white/10 p-3 pl-11 rounded-lg text-white outline-none transition-all">
+          <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
         </div>
       </div>
       
-      <div class="form-group">
-        <label class="text-xs font-semibold text-slate-400 uppercase tracking-widest ml-2 block mb-2">Access Password</label>
-        <div class="relative">
-          <input type="password" id="password" placeholder="Enter password"
-                 onmouseenter="playHover()"
-                 class="input-glow input-transition w-full bg-white/[0.03] border border-white/10 p-3 pl-11 rounded-lg text-white placeholder-slate-500 outline-none font-medium transition-all"
-                 required autocomplete="current-password" />
-          <i class="fas fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-          <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-400 transition-all">
+      <div>
+        <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Access Password</label>
+        <div class="relative mt-1">
+          <input type="password" id="password" placeholder="••••••••" required
+                 class="input-glow w-full bg-white/[0.03] border border-white/10 p-3 pl-11 rounded-lg text-white outline-none transition-all">
+          <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+          <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-400">
             <i id="toggleIcon" class="fas fa-eye"></i>
           </button>
         </div>
       </div>
       
-      <button type="submit" onmouseenter="playHover()"
-          class="w-full auth-btn bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white py-2.5 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]">
+      <button type="submit" class="auth-btn bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 mt-2">
         Sign In
       </button>
     </form>
 
-    <!-- Divider -->
-    <div class="flex items-center gap-3 my-5 footer-animate">
-      <div class="flex-1 h-px bg-white/10"></div>
-      <span class="text-xs text-slate-500 font-medium">OR</span>
-      <div class="flex-1 h-px bg-white/10"></div>
-    </div>
-
-    <!-- Google Sign-In -->
-        <div class="google-btn-animate">
-          <button type="button" onclick="handleGoogleSignIn()" 
-            class="w-full auth-btn bg-white hover:bg-gray-100 text-gray-800 shadow-md transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]">
-        <svg class="w-5 h-5" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-        </svg>
-        <span>Continue with Google</span>
-      </button>
-    </div>
-
-    <!-- Footer Links -->
-    <div class="mt-6 flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs footer-animate">
-      <a href="forgot-pass.html" onmouseenter="playHover()" class="text-slate-500 hover:text-indigo-400 transition-colors link-animate">
-        Forgot Password?
+    <div class="mt-8 flex flex-col sm:flex-row justify-center gap-3">
+      <a href="register.html" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium text-slate-300 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/20 hover:border-indigo-500/30">
+        <i class="fas fa-user-plus mr-2"></i>Create Account
       </a>
-      <span class="text-slate-600">|</span>
-      <a href="register.html" onmouseenter="playHover()" class="text-slate-500 hover:text-indigo-400 transition-colors link-animate">
-        Create an Account?
+      <a href="forgot-pass.html" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium text-slate-300 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/20 hover:border-indigo-500/30">
+        <i class="fas fa-key mr-2"></i>Forgot Password
       </a>
-    </div>
-
-    <!-- Developer Contact (moved to bottom) -->
-    <div class="mt-6 pt-3 border-t border-white/5 text-center dev-contact">
-      <p class="text-[9px] font-semibold text-slate-600 uppercase tracking-[0.3em] mb-3">Connect With Developer</p>
-      <a href="https://www.facebook.com/rixx.carti" target="_blank" 
-        onclick="showFollowNotification(event)"
-        onmouseenter="playHover()"
-        class="inline-flex items-center justify-center dev-follow-btn social-btn bg-[#1877F2] text-white font-semibold transition-all duration-300">
-        <i class="fab fa-facebook-f"></i>
-        <span>Follow</span>
+      <a href="https://www.facebook.com/rixx.carti" target="_blank" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium text-slate-300 hover:text-blue-400 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:border-blue-500/30">
+        <i class="fas fa-headset mr-2"></i>Support
       </a>
     </div>
   </div>
 </div>
 
 <script>
-  // Generate floating particles
+  // Particle Background
   function createParticles() {
     const container = document.getElementById('particles');
-    const particleCount = 30;
-    
-    for (let i = 0; i < particleCount; i++) {
-      const particle = document.createElement('div');
-      particle.className = 'particle';
-      particle.style.left = Math.random() * 100 + '%';
-      particle.style.animationDelay = Math.random() * 15 + 's';
-      particle.style.animationDuration = (15 + Math.random() * 10) + 's';
-      particle.style.width = (2 + Math.random() * 4) + 'px';
-      particle.style.height = particle.style.width;
-      container.appendChild(particle);
+    for (let i = 0; i < 20; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.animationDelay = Math.random() * 10 + 's';
+      p.style.width = Math.random() * 5 + 'px';
+      container.appendChild(p);
     }
   }
-
   createParticles();
 
-  const SUPABASE_URL = 'https://cwxpffwqpbedjffvpsbj.supabase.co'; 
-  const SUPABASE_KEY = 'sb_publishable_s2yXIg3L24wd0XYbrtnmPQ_HH_IN_e7';
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const ADMIN_EMAIL = 'maricris.arenas1017@gmail.com';
-
+  // AUTH LOGIC
   window.onload = () => {
-    supabaseClient.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY") {
-        window.location.href = 'update-password.html'; 
-      }
-    });
+    // Bantayan ang login status
+    if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
+      window.supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          const email = session.user.email.toLowerCase();
+          // Siguraduhin na ang ADMIN_EMAIL ay nasa auth.js
+          const isAdmin = email === ADMIN_EMAIL.toLowerCase();
+
+          Swal.fire({
+            icon: 'success',
+            title: isAdmin ? 'ADMIN ACCESS' : 'STUDENT ACCESS',
+            text: 'Welcome to DNHS Portal!',
+            background: '#0b1120', color: '#fff', showConfirmButton: false, timer: 1500
+          });
+
+          setTimeout(() => {
+            window.location.href = isAdmin ? 'admin.html' : 'student-dashboard.html';
+          }, 1500);
+        }
+      });
+    }
   };
 
-  const clickSound = document.getElementById('clickSound');
-  const hoverSound = document.getElementById('hoverSound');
-  
-  function playClick() { 
-    if (clickSound) { 
-      clickSound.currentTime = 0; 
-      clickSound.play().catch(()=>{}); 
+  document.getElementById('loginForm').onsubmit = async (e) => {
+    e.preventDefault();
+    if (typeof window.supabaseClient === 'undefined' || !window.supabaseClient) {
+      Swal.fire({ icon: 'error', title: 'Error', text: 'System initializing... Please try again.', background: '#0b1120', color: '#fff' });
+      return;
     }
-  }
-  function playHover() { 
-    if (hoverSound) { 
-      hoverSound.currentTime = 0; 
-      hoverSound.volume = 0.08; 
-      hoverSound.play().catch(()=>{}); 
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    Swal.fire({ title: 'Verifying...', didOpen: () => Swal.showLoading(), background: '#0b1120', color: '#fff', showConfirmButton: false });
+
+    const { error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+      Swal.fire({ icon: 'error', title: 'Login Failed', text: error.message, background: '#0b1120', color: '#fff' });
     }
-  }
+  };
 
   function togglePassword() {
-    playClick();
     const passField = document.getElementById('password');
     const icon = document.getElementById('toggleIcon');
     if (passField.type === 'password') {
       passField.type = 'text';
-      icon.classList.remove('fa-eye');
-      icon.classList.add('fa-eye-slash');
+      icon.className = 'fas fa-eye-slash';
     } else {
       passField.type = 'password';
-      icon.classList.remove('fa-eye-slash');
-      icon.classList.add('fa-eye');
+      icon.className = 'fas fa-eye';
     }
   }
-
-  // Follow button notification
-  function showFollowNotification(e) {
-    e.preventDefault();
-    playClick();
-    
-    Swal.fire({
-      html: `
-        <div class="flex flex-col items-center gap-3">
-          <div class="w-14 h-14 rounded-full bg-[#1877F2] flex items-center justify-center shadow-lg shadow-[#1877F2]/30">
-            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-            </svg>
-          </div>
-          <div class="text-center">
-            <h3 class="text-lg font-semibold text-white">Connect with Developer</h3>
-            <p class="text-sm text-slate-400 mt-1">Opening Facebook</p>
-          </div>
-          <div class="w-full bg-white/10 rounded-full h-1 mt-2 overflow-hidden">
-            <div class="bg-[#1877F2] h-1 rounded-full" style="width: 0%; animation: progressFill 2s ease-out forwards;"></div>
-          </div>
-        </div>
-      `,
-      background: '#0b1120',
-      color: '#fff',
-      showConfirmButton: false,
-      showCancelButton: false,
-      width: '340px',
-      padding: '1.5rem',
-      timer: 2000,
-      didOpen: () => {
-        const style = document.createElement('style');
-        style.textContent = `@keyframes progressFill { from { width: 0%; } to { width: 100%; } }`;
-        document.head.appendChild(style);
-        
-        // Open Facebook after timer
-        setTimeout(() => {
-          window.open('https://www.facebook.com/rixx.carti', '_blank');
-        }, 2000);
-      }
-    });
-  }
-
-  // Loading screen for navigation
-  function showLoadingScreen(e, message) {
-    e.preventDefault();
-    playClick();
-    
-    const targetUrl = e.currentTarget.href;
-    
-    Swal.fire({
-      html: `
-        <div class="flex flex-col items-center gap-4">
-          <div class="google-loader relative w-14 h-14">
-            <svg class="w-14 h-14 transform -rotate-90">
-              <circle cx="28" cy="28" r="20" fill="none" stroke="#0EA5E9" stroke-width="3" stroke-linecap="round" stroke-dasharray="95" stroke-dashoffset="0" style="animation: skySpin 1.5s ease-in-out infinite;"></circle>
-            </svg>
-            <svg class="w-14 h-14 transform -rotate-90 absolute top-0 left-0 opacity-60">
-              <circle cx="28" cy="28" r="20" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" stroke-dasharray="70" stroke-dashoffset="60" style="animation: skySpin 1.5s ease-in-out infinite; animation-delay: 0.25s;"></circle>
-            </svg>
-            <svg class="w-14 h-14 transform -rotate-90 absolute top-0 left-0 opacity-60">
-              <circle cx="28" cy="28" r="20" fill="none" stroke="#7DD3FC" stroke-width="3" stroke-linecap="round" stroke-dasharray="60" stroke-dashoffset="30" style="animation: skySpin 1.5s ease-in-out infinite; animation-delay: 0.5s;"></circle>
-            </svg>
-            <svg class="w-14 h-14 transform -rotate-90 absolute top-0 left-0 opacity-60">
-              <circle cx="28" cy="28" r="20" fill="none" stroke="#BAE6FD" stroke-width="3" stroke-linecap="round" stroke-dasharray="45" stroke-dashoffset="0" style="animation: skySpin 1.5s ease-in-out infinite; animation-delay: 0.75s;"></circle>
-            </svg>
-          </div>
-          <div class="text-center">
-            <h3 class="text-lg font-semibold text-white">Please Wait</h3>
-            <p class="text-sm text-slate-400 mt-1">${message}</p>
-          </div>
-        </div>
-      `,
-      background: '#0b1120',
-      color: '#fff',
-      showConfirmButton: false,
-      showCancelButton: false,
-      width: '320px',
-      padding: '1.5rem',
-      allowOutsideClick: false,
-      didOpen: () => {
-        // Navigate after short delay
-        setTimeout(() => {
-          window.location.href = targetUrl;
-        }, 1500);
-      }
-    });
-  }
-
-  function parseJwt(token) {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    return JSON.parse(jsonPayload);
-  }
-
-  async function handleCredentialResponse(response) {
-    try {
-      playClick();
-      const userInfo = parseJwt(response.credential);
-      const email = userInfo.email.toLowerCase();
-
-      const { data, error } = await supabaseClient.auth.signInWithIdToken({
-        provider: 'google',
-        token: response.credential,
-      });
-      if (error) throw error;
-
-      const isAdmin = email === ADMIN_EMAIL.toLowerCase();
-
-      Swal.fire({
-        icon: 'success',
-        title: isAdmin ? 'ADMIN ACCESS GRANTED' : 'STUDENT ACCESS GRANTED',
-        html: '<p class="text-sm text-indigo-400">Initializing your dashboard...</p>',
-        background: '#0b1120',
-        color: '#fff',
-        showConfirmButton: false,
-        timer: 2000,
-        didOpen: () => Swal.showLoading()
-      });
-
-      setTimeout(() => { 
-        window.location.href = isAdmin ? 'admin.html' : 'student-dashboard.html'; 
-      }, 2000);
-    } catch (err) {
-      Swal.fire({ 
-        icon: 'error', 
-        title: 'AUTHENTICATION FAILED', 
-        text: err.message, 
-        background: '#0b1120', 
-        color: '#fff',
-        confirmButtonColor: '#6366f1'
-      });
-    }
-  }
-
-  document.getElementById('loginForm').onsubmit = async (e) => {
-    e.preventDefault();
-    playClick();
-    const email = document.getElementById('email').value.trim().toLowerCase();
-    const password = document.getElementById('password').value;
-
-    Swal.fire({
-      title: '<span class="text-indigo-400 font-semibold">AUTHENTICATING</span>',
-      html: '<p class="text-xs text-slate-400 uppercase tracking-widest">Verifying credentials...</p>',
-      showConfirmButton: false,
-      background: '#0b1120',
-      color: '#fff',
-      didOpen: () => Swal.showLoading()
-    });
-
-    try {
-      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      
-      const is_admin = email === ADMIN_EMAIL.toLowerCase();
-
-      Swal.fire({
-        icon: 'success',
-        title: is_admin ? 'WELCOME ADMIN' : 'WELCOME STUDENT',
-        text: 'Redirecting to dashboard...',
-        background: '#0b1120',
-        color: '#fff',
-        showConfirmButton: false,
-        timer: 1500
-      });
-
-      setTimeout(() => { 
-        window.location.href = is_admin ? 'admin.html' : 'student-dashboard.html'; 
-      }, 1500);
-    } catch (err) {
-      Swal.fire({ 
-        icon: 'error', 
-        title: 'ACCESS DENIED', 
-        text: err.message, 
-        background: '#0b1120', 
-        color: '#fff',
-        confirmButtonColor: '#ef4444'
-      });
-    }
-  };
 </script>
 
 </body>
