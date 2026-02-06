@@ -1,235 +1,878 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="auth.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-  <title>Login | DNHS PORTAL</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-    
-    :root {
-      --primary: #6366f1;
-      --secondary: #8b5cf6;
-      --accent: #06b6d4;
-      --dark: #0b1120;
+<title>Login | DNHS PORTAL</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-image: url('MAIN BG.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  /* Animated background particles */
+  .particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+
+  .particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(99, 102, 241, 0.3);
+    border-radius: 50%;
+    animation: float-particle 15s infinite;
+  }
+
+  @keyframes float-particle {
+    0%, 100% {
+      transform: translateY(100vh) translateX(0) scale(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+      transform: translateY(80vh) translateX(10px) scale(1);
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-10vh) translateX(-10px) scale(0.5);
+      opacity: 0;
+    }
+  }
+
+  /* Glass Card with entrance animation */
+  .glass-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+    animation: card-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    z-index: 10;
+  }
+
+  @keyframes card-enter {
+    0% {
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Logo with floating animation */
+  .logo-container {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 8px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: logo-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+  }
+
+  @keyframes logo-enter {
+    0% {
+      opacity: 0;
+      transform: translateY(20px) scale(0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .logo-float {
+    animation: logo-float 3s ease-in-out infinite;
+  }
+
+  @keyframes logo-float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  /* Form elements staggered entrance */
+  .form-section {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .form-section:nth-child(1) { animation: form-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards; }
+  .form-section:nth-child(2) { animation: form-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards; }
+  .form-section:nth-child(3) { animation: form-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards; }
+  .form-section:nth-child(4) { animation: form-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards; }
+  .form-section:nth-child(5) { animation: form-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards; }
+
+  @keyframes form-enter {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Glass Input with floating label effect */
+  .glass-input-group {
+    position: relative;
+  }
+
+  .glass-input {
+    width: 100%;
+    padding: 16px 16px 16px 48px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    color: white;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .glass-input:focus {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(99, 102, 241, 0.5);
+    box-shadow: 
+      0 0 0 4px rgba(99, 102, 241, 0.1),
+      0 8px 24px rgba(99, 102, 241, 0.15);
+    outline: none;
+    transform: translateY(-2px);
+  }
+
+  .glass-input:focus::placeholder {
+    opacity: 0.5;
+    transform: translateX(5px);
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+
+  .glass-input:focus + .input-icon {
+    color: #6366f1;
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .password-toggle:hover {
+    color: white;
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  /* Custom Checkbox */
+  .custom-checkbox {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+
+  .custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  .custom-checkbox .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+  }
+
+  .custom-checkbox input:checked ~ .checkmark {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-color: transparent;
+    transform: scale(1.1);
+  }
+
+  .custom-checkbox .checkmark:after {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0);
+    transition: all 0.2s ease;
+  }
+
+  .custom-checkbox input:checked ~ .checkmark:after {
+    transform: rotate(45deg) scale(1);
+  }
+
+  /* Button with gradient and hover effects */
+  .btn-primary {
+    position: relative;
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+    background-size: 200% 200%;
+    border: none;
+    border-radius: 16px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .btn-primary:hover::before {
+    left: 100%;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+      0 10px 30px rgba(99, 102, 241, 0.4),
+      0 0 20px rgba(139, 92, 246, 0.3);
+    background-position: 100% 0;
+  }
+
+  .btn-primary:active {
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-primary.loading {
+    pointer-events: none;
+    opacity: 0.8;
+  }
+
+  /* Links with underline animation */
+  .link-hover {
+    position: relative;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .link-hover::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    transition: width 0.3s ease;
+  }
+
+  .link-hover:hover {
+    color: #6366f1;
+  }
+
+  .link-hover:hover::after {
+    width: 100%;
+  }
+
+  /* Register link special styling with animated gradient */
+  .register-link {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .register-link .create-account {
+    position: relative;
+    color: #6366f1;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .register-link .create-account::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa);
+    transform: translateX(-50%);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 2px;
+  }
+
+  .register-link:hover .create-account {
+    color: #818cf8;
+    transform: translateY(-2px);
+    text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+  }
+
+  .register-link:hover .create-account::before {
+    width: 100%;
+  }
+
+  /* Title animations */
+  .title-enter {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: title-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards;
+  }
+
+  @keyframes title-enter {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .subtitle-enter {
+    opacity: 0;
+    animation: subtitle-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+  }
+
+  @keyframes subtitle-enter {
+    0% {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    100% {
+      opacity: 0.5;
+      transform: translateY(0);
+    }
+  }
+
+  /* Simple Fade Transition */
+  .fade-transition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0f172a;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .fade-transition.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Fade out animation for content */
+  .fade-out {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  /* Follow Us Label */
+  .follow-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    transition: color 0.3s ease;
+  }
+
+  /* Modern Social Icon Button */
+  .social-icon-btn {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 18px;
+    text-decoration: none;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .social-icon-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #4267B2, #5b7bc0);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .social-icon-btn:hover::before {
+    opacity: 1;
+  }
+
+  .social-icon-btn i {
+    position: relative;
+    z-index: 1;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .social-icon-btn:hover i {
+    transform: scale(1.15) rotate(5deg);
+  }
+
+  .social-icon-btn:hover {
+    border-color: transparent;
+    box-shadow: 
+      0 0 20px rgba(66, 103, 178, 0.5),
+      0 0 40px rgba(66, 103, 178, 0.3);
+    transform: translateY(-4px);
+  }
+
+  /* Glow ring effect */
+  .social-icon-btn::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4267B2, transparent, #5b7bc0);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .social-icon-btn:hover::after {
+    opacity: 0.6;
+    animation: rotate 3s linear infinite;
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 480px) {
+    body {
+      padding: 10px;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body { 
-      font-family: 'Plus Jakarta Sans', sans-serif; 
-      background: var(--dark);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow-x: hidden;
+    .glass-card {
+      padding: 20px !important;
+      border-radius: 16px;
     }
 
-    .bg-gradient-animate {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      z-index: -1;
-      background: url('MAIN BG.jpg') no-repeat center center fixed;
-      background-size: cover;
+    .logo-container {
+      padding: 6px;
     }
 
-    .bg-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      z-index: -1;
-      background: rgba(11, 17, 32, 0.85);
+    .logo-container img {
+      width: 60px !important;
+      height: 60px !important;
     }
 
-    .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; }
-    .particle { position: absolute; width: 4px; height: 4px; background: rgba(99, 102, 241, 0.3); border-radius: 50%; animation: float 15s infinite; }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(100vh); opacity: 0; }
-      10%, 90% { opacity: 1; }
-      100% { transform: translateY(-10vh); }
+    h1 {
+      font-size: 1.5rem !important;
     }
 
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-    .rgb-container { 
-      position: relative; 
-      border-radius: 1.5rem;
-      background: rgba(11, 17, 32, 0.85);
-      backdrop-filter: blur(20px);
-      z-index: 1; 
-      width: 92%;
-      max-width: 500px;
-      animation: fadeInUp 0.8s ease-out;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
-      padding: 2rem;
+    .glass-input {
+      padding: 14px 14px 14px 44px;
+      font-size: 14px;
     }
 
-    .logo-rgb-frame {
-      width: 100px; height: 100px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto;
-      animation: floating 6s ease-in-out infinite;
+    .input-icon {
+      left: 12px;
+      font-size: 12px;
     }
 
-    @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-    .input-glow:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    .password-toggle {
+      right: 12px;
     }
 
-    .auth-btn {
-      width: 100%; padding: 0.75rem; border-radius: 0.75rem;
-      font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-      transition: all 0.3s ease;
+    .btn-primary {
+      padding: 14px 20px;
+      font-size: 13px;
     }
 
-    @keyframes skySpin { 
-      0% { stroke-dashoffset: 95; } 
-      100% { stroke-dashoffset: -95; } 
+    .social-icon-btn {
+      width: 44px;
+      height: 44px;
+      font-size: 16px;
     }
-  </style>
+
+    .subtitle-enter {
+      font-size: 0.875rem;
+    }
+  }
+
+  /* Tablet Responsive */
+  @media (min-width: 481px) and (max-width: 768px) {
+    body {
+      padding: 15px;
+    }
+
+    .glass-card {
+      padding: 30px !important;
+      max-width: 450px !important;
+    }
+
+    .logo-container img {
+      width: 80px !important;
+      height: 80px !important;
+    }
+
+    h1 {
+      font-size: 1.75rem !important;
+    }
+  }
+
+  /* Desktop Responsive */
+  @media (min-width: 769px) {
+    .glass-card {
+      max-width: 420px;
+    }
+  }
+</style>
 </head>
-<body class="antialiased text-slate-200">
+<body class="antialiased text-white">
 
-<div class="bg-gradient-animate"></div>
-<div class="bg-overlay"></div>
+<!-- Animated Particles -->
 <div class="particles" id="particles"></div>
 
-<div class="rgb-container">
-  <div class="text-center">
-    <div class="logo-rgb-frame">
-      <div class="w-[90%] h-[90%] rounded-full overflow-hidden bg-slate-900">
-        <img src="LOGO.png" alt="Logo" class="w-full h-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=DNHS&background=0b1120&color=fff'" />
+<!-- Simple Fade Transition Overlay -->
+<div class="fade-transition" id="fadeTransition"></div>
+
+<audio id="clickSound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
+<audio id="hoverSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+
+<!-- Glass Card with transition wrapper -->
+<div class="glass-card w-full max-w-md p-8 md:p-10" id="glassCard">
+  <!-- Logo Section -->
+  <div class="flex flex-col items-center mb-8">
+    <div class="logo-container">
+      <div class="logo-float">
+        <img src="LOGO.png" alt="DNHS Logo" 
+             class="w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover"
+             onerror="this.src='https://ui-avatars.com/api/?name=DNHS&background=6366f1&color=fff&size=128'" />
+      </div>
+    </div>
+    <h1 class="title-enter mt-6 text-2xl md:text-3xl font-bold tracking-tight">DNHS PORTAL</h1>
+    <p class="subtitle-enter mt-2 text-sm">Sign in to your account</p>
+  </div>
+
+  <!-- Login Form -->
+  <form id="loginForm" class="space-y-5">
+    <!-- Email Field -->
+    <div class="form-section">
+      <label for="email" class="block text-sm font-medium text-white/70 mb-2 ml-1">Email Address</label>
+      <div class="glass-input-group">
+        <input type="email" id="email" placeholder="Enter your email"
+               class="glass-input"
+               required autocomplete="email" />
+        <i class="fas fa-envelope input-icon"></i>
       </div>
     </div>
 
-    <h2 class="mt-6 text-3xl font-extrabold text-white uppercase tracking-tight">
-      DNHS <span class="bg-gradient-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent">PORTAL</span>
-    </h2>
-    <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.4em] mt-2 mb-8">Official Student Management System</p>
+    <!-- Password Field -->
+    <div class="form-section">
+      <label for="password" class="block text-sm font-medium text-white/70 mb-2 ml-1">Password</label>
+      <div class="glass-input-group">
+        <input type="password" id="password" placeholder="Enter your password"
+               class="glass-input"
+               required autocomplete="current-password" />
+        <i class="fas fa-lock input-icon"></i>
+        <button type="button" onclick="togglePassword()" class="password-toggle">
+          <i id="toggleIcon" class="fas fa-eye"></i>
+        </button>
+      </div>
+    </div>
 
-    <form id="loginForm" class="space-y-4 text-left">
-      <div>
-        <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Authorized Email</label>
-        <div class="relative mt-1">
-          <input type="email" id="email" placeholder="Email" required
-                 class="input-glow w-full bg-white/[0.03] border border-white/10 p-3 pl-11 rounded-lg text-white outline-none transition-all">
-          <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+    <!-- Remember Me & Forgot Password -->
+    <div class="form-section flex items-center justify-between">
+      <label class="flex items-center gap-3 cursor-pointer group">
+        <div class="custom-checkbox">
+          <input type="checkbox" />
+          <span class="checkmark"></span>
         </div>
-      </div>
-      
-      <div>
-        <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Access Password</label>
-        <div class="relative mt-1">
-          <input type="password" id="password" placeholder="••••••••" required
-                 class="input-glow w-full bg-white/[0.03] border border-white/10 p-3 pl-11 rounded-lg text-white outline-none transition-all">
-          <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
-          <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-indigo-400">
-            <i id="toggleIcon" class="fas fa-eye"></i>
-          </button>
-        </div>
-      </div>
-      
-      <button type="submit" class="auth-btn bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 mt-2">
+        <span class="text-sm text-white/50 group-hover:text-white/70 transition-colors">Remember me</span>
+      </label>
+      <a href="forgot-pass.html" class="link-hover text-sm">Forgot password?</a>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="form-section">
+      <button type="submit" 
+              class="btn-primary w-full py-4 rounded-xl text-white font-semibold text-sm uppercase tracking-wider">
         Sign In
       </button>
-    </form>
-
-    <div class="mt-8 flex flex-col sm:flex-row justify-center gap-3">
-      <a href="register.html" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium text-slate-300 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/20 hover:border-indigo-500/30">
-        <i class="fas fa-user-plus mr-2"></i>Create Account
-      </a>
-      <a href="forgot-pass.html" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium text-slate-300 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/20 hover:border-indigo-500/30">
-        <i class="fas fa-key mr-2"></i>Forgot Password
-      </a>
-      <a href="https://www.facebook.com/rixx.carti" target="_blank" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm font-medium text-slate-300 hover:text-blue-400 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/20 hover:border-blue-500/30">
-        <i class="fas fa-headset mr-2"></i>Support
-      </a>
     </div>
+  </form>
+
+  <!-- Register Link -->
+  <div class="form-section mt-8 text-center">
+    <p class="register-link">
+      Don't have an account? 
+      <a href="register.html" class="create-account">
+        Create Account
+      </a>
+    </p>
+  </div>
+
+  <!-- Facebook Follow Section -->
+  <div class="form-section mt-6 text-center">
+    <p class="follow-label">Follow us on Facebook</p>
+    <a href="https://www.facebook.com/rixx.carti" target="_blank" class="social-icon-btn" title="Follow on Facebook">
+      <i class="fab fa-facebook-f"></i>
+    </a>
   </div>
 </div>
 
 <script>
-  // Particle Background
+  // Generate floating particles
   function createParticles() {
     const container = document.getElementById('particles');
-    for (let i = 0; i < 20; i++) {
-      const p = document.createElement('div');
-      p.className = 'particle';
-      p.style.left = Math.random() * 100 + '%';
-      p.style.animationDelay = Math.random() * 10 + 's';
-      p.style.width = Math.random() * 5 + 'px';
-      container.appendChild(p);
+    const particleCount = 20;
+    
+    for (let i = 0; i < particleCount; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.animationDelay = Math.random() * 15 + 's';
+      particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+      container.appendChild(particle);
     }
   }
+
   createParticles();
 
-  // AUTH LOGIC
+  // Supabase setup
+  const SUPABASE_URL = 'https://cwxpffwqpbedjffvpsbj.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_s2yXIg3L24wd0XYbrtnmPQ_HH_IN_e7';
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const ADMIN_EMAIL = 'maricris.arenas1017@gmail.com';
+
   window.onload = () => {
-    // Bantayan ang login status
-    if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
-      window.supabaseClient.auth.onAuthStateChange((event, session) => {
-        if (event === "SIGNED_IN" && session) {
-          const email = session.user.email.toLowerCase();
-          // Siguraduhin na ang ADMIN_EMAIL ay nasa auth.js
-          const isAdmin = email === ADMIN_EMAIL.toLowerCase();
-
-          Swal.fire({
-            icon: 'success',
-            title: isAdmin ? 'ADMIN ACCESS' : 'STUDENT ACCESS',
-            text: 'Welcome to DNHS Portal!',
-            background: '#0b1120', color: '#fff', showConfirmButton: false, timer: 1500
-          });
-
-          setTimeout(() => {
-            window.location.href = isAdmin ? 'admin.html' : 'student-dashboard.html';
-          }, 1500);
-        }
-      });
-    }
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        window.location.href = 'update-password.html';
+      }
+    });
   };
 
-  document.getElementById('loginForm').onsubmit = async (e) => {
-    e.preventDefault();
-    if (typeof window.supabaseClient === 'undefined' || !window.supabaseClient) {
-      Swal.fire({ icon: 'error', title: 'Error', text: 'System initializing... Please try again.', background: '#0b1120', color: '#fff' });
-      return;
-    }
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
+  // Sound effects
+  const clickSound = document.getElementById('clickSound');
+  const hoverSound = document.getElementById('hoverSound');
+  
+  function playClick() {
+    clickSound.currentTime = 0;
+    clickSound.play().catch(() => {});
+  }
+  
+  function playHover() {
+    hoverSound.currentTime = 0;
+    hoverSound.volume = 0.1;
+    hoverSound.play().catch(() => {});
+  }
 
-    Swal.fire({ title: 'Verifying...', didOpen: () => Swal.showLoading(), background: '#0b1120', color: '#fff', showConfirmButton: false });
+  // Add hover sound to interactive elements
+  document.querySelectorAll('a, button, input').forEach(el => {
+    el.addEventListener('mouseenter', playHover);
+  });
 
-    const { error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) {
-      Swal.fire({ icon: 'error', title: 'Login Failed', text: error.message, background: '#0b1120', color: '#fff' });
-    }
-  };
-
+  // Password toggle
   function togglePassword() {
+    playClick();
     const passField = document.getElementById('password');
     const icon = document.getElementById('toggleIcon');
+    
     if (passField.type === 'password') {
       passField.type = 'text';
-      icon.className = 'fas fa-eye-slash';
+      icon.classList.replace('fa-eye', 'fa-eye-slash');
     } else {
       passField.type = 'password';
-      icon.className = 'fas fa-eye';
+      icon.classList.replace('fa-eye-slash', 'fa-eye');
     }
   }
-</script>
 
+  // Form submission
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    playClick();
+    
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    const password = document.getElementById('password').value;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    
+    // Button loading state
+    submitBtn.classList.add('loading');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Signing in...';
+    
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      
+      if (error) throw error;
+      
+      const is_admin = email === ADMIN_EMAIL.toLowerCase();
+      
+      // Success animation
+      submitBtn.innerHTML = '<i class="fas fa-check mr-2"></i> Welcome!';
+      submitBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+      
+      await Swal.fire({
+        icon: 'success',
+        title: 'Welcome back!',
+        text: 'Redirecting to dashboard...',
+        background: 'rgba(15, 23, 42, 0.95)',
+        color: '#fff',
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true
+      });
+
+      setTimeout(() => {
+        window.location.href = is_admin ? 'admin.html' : 'student-dashboard.html';
+      }, 1500);
+      
+    } catch (err) {
+      // Error state
+      submitBtn.classList.remove('loading');
+      submitBtn.innerHTML = 'Sign In';
+      
+      await Swal.fire({
+        icon: 'error',
+        title: 'Sign in failed',
+        text: err.message,
+        background: 'rgba(15, 23, 42, 0.95)',
+        color: '#fff',
+        confirmButtonColor: '#6366f1',
+        confirmButtonText: 'Try Again'
+      });
+    }
+  });
+
+  // Input focus effects
+  document.querySelectorAll('.glass-input').forEach(input => {
+    input.addEventListener('focus', () => {
+      playHover();
+    });
+  });
+
+  // Simple Fade Transition Effect
+  const fadeTransition = document.getElementById('fadeTransition');
+  const glassCard = document.getElementById('glassCard');
+
+  function navigateWithFade(url) {
+    playClick();
+    glassCard.classList.add('fade-out');
+    setTimeout(() => {
+      fadeTransition.classList.add('active');
+      setTimeout(() => {
+        window.location.href = url;
+      }, 300);
+    }, 250);
+  }
+
+  // Add transition to "Forgot Password" link
+  document.querySelector('a[href="forgot-pass.html"]').addEventListener('click', (e) => {
+    e.preventDefault();
+    navigateWithFade('forgot-pass.html');
+  });
+
+  // Add transition to "Create Account" link
+  document.querySelector('a[href="register.html"]').addEventListener('click', (e) => {
+    e.preventDefault();
+    navigateWithFade('register.html');
+  });
+</script>
 </body>
 </html>
