@@ -6,7 +6,7 @@ const SUPABASE_KEY = 'sb_publishable_s2yXIg3L24wd0XYbrtnmPQ_HH_IN_e7';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 2. ADMIN CONFIGURATION
-const ADMIN_EMAIL = 'zanstudio01@gmail.com'; 
+const ADMIN_EMAIL = 'maricris.arenas1017@gmail.com'; 
 
 /**
  * HANDLE LOGIN
@@ -137,4 +137,26 @@ function showError(message) {
         color: '#fff',
         confirmButtonColor: '#4f46e5'
     });
+}
+
+/**
+ * HANDLE GOOGLE SIGN IN
+ */
+async function handleGoogleSignIn() {
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin + '/index.html',
+                queryParams: {
+                    access_type: 'offline',
+                    prompt: 'consent',
+                },
+            }
+        });
+
+        if (error) throw error;
+    } catch (err) {
+        showError(err.message);
+    }
 }
