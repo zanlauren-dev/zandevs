@@ -15,6 +15,7 @@ function initSupabase() {
         return;
     }
     window.supabaseClient = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log('Supabase initialized successfully');
 }
 
 // Start initialization
